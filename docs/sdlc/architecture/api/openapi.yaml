@@ -2,6 +2,313 @@
 openapi: 3.1.0
 info:
   title: Movies recommendation
-  version: architecture-v0
+  version: architecture-v1
   description: Designed API from the approved architecture (not extracted from code).
-paths: {}
+paths:
+  /admin/movies/upload:
+    post:
+      summary: Admin-only CSV upload with header title, year, genres, director, cast,
+        plot and '|' separating genres and cast. A non-CS
+      description: Admin-only CSV upload with header title, year, genres, director,
+        cast, plot and '|' separating genres and cast. A non-CSV file or missing columns
+        is rejected and nothing is added. Duplicates (existing or in-file) are skipped
+        and invalid rows rejected. The similarity index is rebuilt after commit.
+      operationId: post_admin_movies_upload
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: 'multipart/form-data: file (.csv)'
+      responses:
+        '200':
+          description: '200 {added, skipped, rejected, issues: [{row, status: ''skipped''|''rejected'',
+            reason}]}, or 400 with a message when the file or header is invalid, or
+            403 for a viewer, or 401 when unauthenticated'
+      security:
+      - bearerAuth: []
+  /auth/login:
+    post:
+      summary: Verify credentials and issue an opaque session token. A wrong password
+        or unknown email returns the same generic 401 mes
+      description: Verify credentials and issue an opaque session token. A wrong password
+        or unknown email returns the same generic 401 message.
+      operationId: post_auth_login
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{email, password}'
+      responses:
+        '200':
+          description: '200 {token, user: {id, email, role}}, or 401 {detail: ''Invalid
+            email or password''}'
+  /auth/logout:
+    post:
+      summary: Revoke the current session on the server.
+      description: Revoke the current session on the server.
+      operationId: post_auth_logout
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: none
+      responses:
+        '200':
+          description: '204'
+      security:
+      - bearerAuth: []
+  /auth/me:
+    get:
+      summary: Return the current user, or 401 if the session is missing, revoked
+        or idle-expired.
+      description: Return the current user, or 401 if the session is missing, revoked
+        or idle-expired.
+      operationId: get_auth_me
+      parameters: []
+      responses:
+        '200':
+          description: '{id, email, role}'
+      security:
+      - bearerAuth: []
+  /auth/signup:
+    post:
+      summary: Create a viewer account and sign in. The role is always viewer and
+        any submitted role is ignored. Duplicate emails are r
+      description: Create a viewer account and sign in. The role is always viewer
+        and any submitted role is ignored. Duplicate emails are refused in any letter
+        case.
+      operationId: post_auth_signup
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: '{email, password (min 8 chars)}'
+      responses:
+        '200':
+          description: '201 {token, user: {id, email, role}}, or 409 duplicate email,
+            or 422 with field-specific messages'
+  /health:
+    get:
+      summary: Liveness check for deployment.
+      description: Liveness check for deployment.
+      operationId: get_health
+      parameters: []
+      responses:
+        '200':
+          description: '{status: ''ok''}'
+  /me/for-you:
+    get:
+      summary: Movies ranked by combined similarity to all of the caller's likes,
+        excluding already-liked movies. With no likes, has_li
+      description: Movies ranked by combined similarity to all of the caller's likes,
+        excluding already-liked movies. With no likes, has_likes is false and items
+        is empty.
+      operationId: get_me_for_you
+      parameters: []
+      responses:
+        '200':
+          description: '{has_likes: boolean, items: [{id, title, year, score}]}'
+      security:
+      - bearerAuth: []
+  /me/likes:
+    get:
+      summary: The caller's own liked movies only.
+      description: The caller's own liked movies only.
+      operationId: get_me_likes
+      parameters: []
+      responses:
+        '200':
+          description: '{items: [{id, title, year}]}'
+      security:
+      - bearerAuth: []
+  /movies:
+    get:
+      summary: Search by case-insensitive title substring. An empty q lists the catalog
+        alphabetically with pagination for browsing. Ea
+      description: Search by case-insensitive title substring. An empty q lists the
+        catalog alphabetically with pagination for browsing. Each item carries a liked
+        flag for the caller.
+      operationId: get_movies
+      parameters: []
+      responses:
+        '200':
+          description: '{items: [{id, title, year, liked}], total}, with an empty
+            items list when nothing matches so the UI shows ''no movies found'''
+      security:
+      - bearerAuth: []
+  /movies/{movie_id}:
+    get:
+      summary: Movie detail with the caller's like state.
+      description: Movie detail with the caller's like state.
+      operationId: get_movies_movie_id
+      parameters:
+      - name: movie_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: '{id, title, year, genres, director, cast, plot, liked}, or
+            404 not found'
+      security:
+      - bearerAuth: []
+  /movies/{movie_id}/like:
+    put:
+      summary: Like a movie. Idempotent, so repeats leave a single like.
+      description: Like a movie. Idempotent, so repeats leave a single like.
+      operationId: put_movies_movie_id_like
+      parameters:
+      - name: movie_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: none
+      responses:
+        '200':
+          description: '200 {movie_id, liked: true}, or 404'
+      security:
+      - bearerAuth: []
+    delete:
+      summary: Remove the caller's like. Idempotent.
+      description: Remove the caller's like. Idempotent.
+      operationId: delete_movies_movie_id_like
+      parameters:
+      - name: movie_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: '200 {movie_id, liked: false}, or 404'
+      security:
+      - bearerAuth: []
+  /movies/{movie_id}/similar:
+    get:
+      summary: Other movies ranked by cosine similarity (highest first, ties by id),
+        excluding the movie itself.
+      description: Other movies ranked by cosine similarity (highest first, ties by
+        id), excluding the movie itself.
+      operationId: get_movies_movie_id_similar
+      parameters:
+      - name: movie_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: '{items: [{id, title, year, score, liked}]}, or 404 if the
+            movie is unknown'
+      security:
+      - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    users:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        password_hash:
+          type: string
+        role:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - email
+      - password_hash
+      - role
+      - created_at
+    sessions:
+      type: object
+      properties:
+        id:
+          type: string
+        token_hash:
+          type: string
+        user_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        last_seen_at:
+          type: string
+          format: date-time
+        revoked_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - token_hash
+      - user_id
+      - created_at
+      - last_seen_at
+    movies:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        title_key:
+          type: string
+        year:
+          type: string
+        genres:
+          type: string
+        director:
+          type: string
+        cast_members:
+          type: string
+        plot:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - title
+      - title_key
+      - year
+      - genres
+      - cast_members
+      - plot
+      - created_at
+    likes:
+      type: object
+      properties:
+        user_id:
+          type: string
+        movie_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - user_id
+      - movie_id
+      - created_at
