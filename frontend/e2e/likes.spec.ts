@@ -79,7 +79,10 @@ test("[AC-044] a like survives logout/login and shows in a second browser contex
   await likeButton(v.page).click();
   await expect(likeButton(v.page)).toHaveAttribute("aria-pressed", "true");
 
-  await v.page.getByRole("button", { name: /log out/i }).first().click();
+  await v.page
+    .getByRole("button", { name: /log out/i })
+    .first()
+    .click();
   await expect(v.page).toHaveURL(/\/login/);
   await login(v.page, v.email, v.secret);
   await openDetail(v.page);
