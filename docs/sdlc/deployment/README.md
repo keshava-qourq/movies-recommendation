@@ -3,20 +3,20 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start narrative -->
-### DEPLOY-923122c8142b · draft · source: deployment:923122c8142b
+### DEPLOY-49dd10d241ab · draft · source: deployment:49dd10d241ab
 
-WatchNext version 923122c8142b is deployed and reported as live. The frontend and backend are served at separate URLs.
+Version 49dd10d241ab of WatchNext is deployed and reported as live. The frontend and backend are served from the URLs below.
 
 - Status: live
-- Version: 923122c8142b
+- Version: 49dd10d241ab
 - Frontend URL: https://pd4a07c9e7733.d3j61xaup4zgrx.amplifyapp.com
 - Backend URL: https://52-34-28-126.sslip.io/apps/d4a07c9e7733/
-- Not stated in the input, so not documented:
-  - deployment date and time
-  - who triggered or approved the deployment
-  - target environment name
-  - post-deploy verification or smoke-test results
-  - rollback information
-  - which requirements this version covers (related_ids is therefore empty)
-- The entry status is 'draft' because the input gives no approval state for this source. 'live' is the runtime state reported by the deployment.
+
+Not provided in the input, so not documented:
+- Deployment date/time and who triggered it
+- Target environment name
+- Build or release contents (changes included)
+- Post-deployment verification or smoke-test results
+- Rollback plan or previous version
+- Which requirements or stories this release covers (related_ids left empty for that reason)
 <!-- sdlc:auto:end narrative -->
