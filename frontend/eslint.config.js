@@ -27,6 +27,10 @@ export default tseslint.config(
     // Generated design screens carry `@ts-nocheck`: they are written under the
     // design phase's JS runtime contract, not as hand-written TypeScript.
     files: ["src/screens/**"],
-    rules: { "@typescript-eslint/ban-ts-comment": "off" },
+    rules: {
+      "@typescript-eslint/ban-ts-comment": "off",
+      // AdminUpload strips a literal BOM with a regex; that is intentional.
+      "no-irregular-whitespace": ["error", { skipRegExps: true }],
+    },
   },
 );

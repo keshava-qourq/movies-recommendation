@@ -10,7 +10,11 @@ COPY app ./app
 
 # Run as an unprivileged user. The service never needs root, and a container that
 # drops it limits what a compromise of the app can do to the host.
-RUN useradd --create-home --uid 10001 appuser
+RUN useradd --create-home --uid 10001 appuser \
+    && mkdir -p /data && chown appuser /data
+# Embedded SQLite lives here when DATABASE_URL is unset; mount a volume on it.
+ENV DATA_DIR=/data
+VOLUME ["/data"]
 USER appuser
 
 EXPOSE 8000

@@ -1,60 +1,64 @@
 """Application entrypoint.
 
-Generated from the approved architecture: one router per component that owns
-endpoints, one route per endpoint the API spec declares. Every generated route
-is a stub that returns a typed placeholder, so the service starts, serves its
-OpenAPI document and passes its tests before a single handler is implemented.
+One router per component that owns endpoints (auth, movies). Migrations and seeding
+run on startup.
 """
 
-import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app import models  # noqa: F401 -- imported so the tables register before create_all
-from app.database import Base, engine
+from app.bootstrap import seed_movies, seed_users
+from app.config import get_settings
+from app.database import SessionLocal
+from app.migrations.runner import upgrade_to_head
+from app.routers import auth, movies
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """The scaffold ships no migrations, so the tables are created from the models
-    when the application starts. Replace this with Alembic before anything holds data
-    worth keeping.
+    """Startup: run migrations, then seed the configured users (idempotent).
 
     This runs on startup and not at import, so importing the application never opens a
-    connection. A test can therefore point `get_db` at a database of its own, and a
-    deployment whose `DATABASE_URL` names a server that is not up fails where you can
-    read the error, not while pytest collects the files.
+    connection and a test can point `get_db` at a database of its own.
     """
-    Base.metadata.create_all(bind=engine)
+    upgrade_to_head()
+    with SessionLocal() as db:
+        seed_users(db)
+        seed_movies(db)
     yield
 
 
 app = FastAPI(
     title="Movies recommendation",
-    description="I want a movie recommendation web app called WatchNext.\n\nA user searches for a movie they liked and the app shows similar movies\nthey might enjoy, using cosine similarity on the movie's plot, genres,\ndirector and cast. Users can like movies and get a \"For you\" list based\non everything they liked.\n\nUsers sign up and log in with email and password, so their likes are\nsaved to their account. There are two roles: viewer and admin.\nOnly admins can upload more movies as a CSV file. The first admin account\nis created from the server config.\n\nThe app must be fully self-contained: it must not call or depend on any\noutside service, API or download, at build time or at run time. That means\nno movie APIs, no poster images from the web, no email sending, no\nthird-party login, and no AI or LLM calls. Ship a built-in sample of about\n50 well-known movies with the app, so it works right after install.",
+    description=(
+        "WatchNext: search for a movie you liked and get similar movies, ranked by cosine "
+        "similarity on plot, genres, director and cast. Like movies to get a For you list. "
+        "Fully self-contained: no outside services at build time or run time."
+    ),
     version="0.1.0",
     lifespan=lifespan,
 )
 
-# The SPA runs on a different origin than the API, so the browser refuses its calls
-# unless that origin is allowed here. In development that is the Vite dev server; when
-# deployed, the platform injects the frontend's real URL as ALLOWED_ORIGINS (comma
-# separated). Point ALLOWED_ORIGINS at the real thing and nothing else has to change.
-_dev_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
-_allowed_origins = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
+# The SPA runs on a different origin than the API. Only that origin is allowed (set by
+# ALLOWED_ORIGINS when deployed). Sessions travel as a Bearer header, never a cookie, so
+# credentials are not allowed.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_allowed_origins or _dev_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=get_settings().allowed_origins,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
 )
+
+
+app.include_router(auth.router)
+app.include_router(movies.router)
 
 
 @app.get("/health")
 async def health() -> dict[str, str]:
-    """Liveness probe, and the only route here that is not a stub."""
+    """Liveness probe, ."""
     return {"status": "ok"}

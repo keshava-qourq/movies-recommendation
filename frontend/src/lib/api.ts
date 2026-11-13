@@ -11,8 +11,7 @@
 // The generated screens do NOT use this yet -- they render seeded sample data, exactly as
 // they were approved. This is the seam to replace that with real calls, one screen at a
 // time.
-export const API_BASE_URL: string =
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
+export const API_BASE_URL: string = import.meta.env.VITE_API_BASE_URL ?? "";
 
 // The shared bearer the deployed API expects (its SECRET_KEY). The platform bakes the
 // same value into both sides at deploy time, so authenticated calls work out of the box.
@@ -50,8 +49,39 @@ export function clearSessionToken(): void {
   }
 }
 
+export type ApiErrorDetail =
+  string | Array<{ loc: Array<string | number>; msg: string; type: string }> | null;
+
+export class ApiError extends Error {
+  status: number;
+  detail: ApiErrorDetail;
+  constructor(status: number, detail: ApiErrorDetail) {
+    super(typeof detail === "string" ? detail : `Request failed: ${status}`);
+    this.status = status;
+    this.detail = detail;
+  }
+}
+
+export interface AuthUser {
+  id: number;
+  email: string;
+  role: "viewer" | "admin";
+}
+
+export interface AuthResponse {
+  token: string;
+  user: AuthUser;
+}
+
+// Called when a call made with a session token comes back 401 (session ended or expired).
+let unauthorizedHandler: (() => void) | null = null;
+
+export function setUnauthorizedHandler(handler: (() => void) | null): void {
+  unauthorizedHandler = handler;
+}
+
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const bearer = getSessionToken() ?? API_SECRET_KEY;
+  const bearer = getSessionToken();
   // Join with exactly one slash: API_BASE_URL is baked with a trailing slash (the API
   // sits behind a /apps/<slug>/ path prefix) and paths start with "/", so a naive
   // concat yields "...//auth/me", which a path-prefix proxy need not route.
@@ -64,7 +94,17 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     },
   });
   if (!response.ok) {
-    throw new Error(`${init?.method ?? "GET"} ${path} failed: ${response.status}`);
+    if (response.status === 401 && bearer) {
+      clearSessionToken();
+      unauthorizedHandler?.();
+    }
+    let detail: ApiErrorDetail = null;
+    try {
+      detail = ((await response.json()) as { detail?: ApiErrorDetail }).detail ?? null;
+    } catch {
+      // Body was not JSON; keep detail null.
+    }
+    throw new ApiError(response.status, detail);
   }
   return response.status === 204 ? (undefined as T) : ((await response.json()) as T);
 }

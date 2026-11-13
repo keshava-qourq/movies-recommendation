@@ -1,30 +1,37 @@
 """Engine, session factory and the request-scoped session dependency.
 
-SQLite by default so a fresh clone runs with nothing but `pip install -r
-requirements.txt` -- the approved architecture may name Postgres or MySQL, but
-naming one is not the same as having one, and a scaffold that cannot start
-without a database server is a scaffold nobody runs. Point `DATABASE_URL` at
-the real thing when it exists; nothing else has to change.
+`DATABASE_URL` is a SQLAlchemy URL (postgresql+psycopg://...) and wins when set. With it
+unset the app uses an embedded SQLite file `app.db` under `DATA_DIR` (default ./data), so
+it needs no other service. The schema changes only through Alembic migrations
+(see `app/migrations`), never through `create_all`.
 """
 
 import os
 from collections.abc import Iterator
+from pathlib import Path
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./app.db")
 
-# SQLite rejects a connection made on one thread and used on another, which is
-# exactly what happens when FastAPI runs a sync dependency in its threadpool.
+def _database_url() -> str:
+    url = os.getenv("DATABASE_URL", "").strip()
+    if url:
+        return url
+    data_dir = Path(os.getenv("DATA_DIR", "").strip() or "./data")
+    data_dir.mkdir(parents=True, exist_ok=True)
+    return f"sqlite:///{(data_dir / 'app.db').resolve()}"
+
+
+DATABASE_URL = _database_url()
+
 _connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
-
-engine = create_engine(DATABASE_URL, connect_args=_connect_args, future=True)
+engine = create_engine(DATABASE_URL, pool_pre_ping=True, future=True, connect_args=_connect_args)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 
 
 class Base(DeclarativeBase):
-    """Declarative base that every generated model inherits."""
+    """Declarative base that every model inherits."""
 
 
 def get_db() -> Iterator[Session]:
