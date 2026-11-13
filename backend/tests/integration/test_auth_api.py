@@ -227,7 +227,9 @@ def test_nfr001_passwords_and_tokens_are_not_stored_in_plain_text(
     # Salted: the same password yields a different stored value for another user.
     _signup(client, password=password)
     stored = [
-        v for row in db_session.execute(text("SELECT * FROM users")).all()
-        for v in row if isinstance(v, str) and v.startswith("$argon2")
+        v
+        for row in db_session.execute(text("SELECT * FROM users")).all()
+        for v in row
+        if isinstance(v, str) and v.startswith("$argon2")
     ]
     assert len(stored) == 2 and stored[0] != stored[1]
