@@ -23,9 +23,9 @@ test("[AC-015] login and signup offer no reset or verification option and send n
     await expect(page.getByRole("link", { name: /forgot|reset|verif/i })).toHaveCount(0);
     await expect(page.getByRole("button", { name: /forgot|reset|verif|resend/i })).toHaveCount(0);
   }
-  expect(requests.filter((u) => /email|reset|verif|forgot|mail/i.test(new URL(u).pathname))).toEqual(
-    [],
-  );
+  expect(
+    requests.filter((u) => /email|reset|verif|forgot|mail/i.test(new URL(u).pathname)),
+  ).toEqual([]);
 });
 
 test("[AC-015] signing up makes no reset, verify or email API call", async ({ page }) => {
