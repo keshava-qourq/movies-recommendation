@@ -57,7 +57,7 @@ def signup(body: SignupRequest, db: DB) -> AuthResponse:
     user = User(email=email, password_hash=hash_password(body.password), role="viewer")
     db.add(user)
     try:
-        db.commit()
+        db.flush()
     except IntegrityError:
         db.rollback()
         raise conflict from None

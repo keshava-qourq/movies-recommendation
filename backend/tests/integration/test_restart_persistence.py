@@ -42,6 +42,23 @@ def test_ac024_accounts_and_sample_movies_survive_restart(client: TestClient) ->
         assert after.json()["total"] == total
 
 
+def test_ac024_likes_survive_restart(client: TestClient) -> None:
+    email, password = _creds()
+    with TestClient(app) as c:
+        signup = c.post("/auth/signup", json={"email": email, "password": password})
+        assert signup.status_code == 201
+        headers = _auth(signup.json()["token"])
+        listing = c.get("/movies", params={"limit": 1}, headers=headers)
+        movie_id = listing.json()["items"][0]["id"]
+        liked = c.post(f"/movies/{movie_id}/like", headers=headers)
+        assert liked.status_code == 200
+    with TestClient(app) as c:
+        login = c.post("/auth/login", json={"email": email, "password": password})
+        assert login.status_code == 200
+        after = c.get("/me/likes", headers=_auth(login.json()["token"]))
+        assert [m["id"] for m in after.json()["items"]] == [movie_id]
+
+
 def test_ac024_nfr010_first_admin_and_catalog_not_duplicated(
     client: TestClient, monkeypatch
 ) -> None:

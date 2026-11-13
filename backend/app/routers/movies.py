@@ -1,4 +1,4 @@
-"""Signed-in movie feature entry points (NFR-004). Handlers are placeholders until built."""
+"""Signed-in movie feature entry points (NFR-004)."""
 
 from typing import Annotated, Any
 

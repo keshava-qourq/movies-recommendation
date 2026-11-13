@@ -14,6 +14,14 @@ def _optional(name: str) -> str | None:
     return value or None
 
 
+def _int(name: str, default: int) -> int:
+    try:
+        value = int(os.getenv(name, "").strip() or default)
+    except ValueError:
+        return default
+    return value if value > 0 else default
+
+
 @dataclass(frozen=True)
 class Settings:
     # The SPA's origin(s) for CORS, comma separated.
@@ -40,5 +48,5 @@ def get_settings() -> Settings:
         bootstrap_admin_password=_optional("BOOTSTRAP_ADMIN_PASSWORD"),
         smoke_test_email=_optional("SMOKE_TEST_EMAIL"),
         smoke_test_password=_optional("SMOKE_TEST_PASSWORD"),
-        session_idle_minutes=int(os.getenv("SESSION_IDLE_MINUTES", "30") or 30),
+        session_idle_minutes=_int("SESSION_IDLE_MINUTES", 30),
     )

@@ -10,6 +10,7 @@ import logging
 from pathlib import Path
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.config import Settings, get_settings
@@ -52,7 +53,12 @@ def _ensure_user(db: Session, email: str, password: str, role: str) -> bool:
     if db.scalar(select(User.id).where(User.email == email)) is not None:
         return False
     db.add(User(email=email, password_hash=hash_password(password), role=role))
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        # Another worker seeded the same user first.
+        db.rollback()
+        return False
     return True
 
 
