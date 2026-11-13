@@ -112,11 +112,20 @@ describe("MovieDetail", () => {
     expect(document.querySelector("input[type=file]")).toBeNull();
   });
 
-  it("[AC-031] a non-integer id shows Movie not found without calling the API", async () => {
-    routes([]);
+  it("[AC-029] a title param is resolved through the movie lookup", async () => {
+    routes([{ id: 7 }]);
+    apiFetch.mockImplementationOnce(async () => ({ items: [heat] }));
+    setup("/movie-detail?movie=heat");
+    expect(await screen.findByRole("heading", { level: 1 })).toHaveTextContent("Heat (1995)");
+    expect(apiFetch.mock.calls[0][0]).toBe("/movies?q=heat&limit=100");
+    expect(screen.getByRole("button", { pressed: true })).toBeInTheDocument();
+  });
+
+  it("[AC-031] an unmatched title shows Movie not found", async () => {
+    apiFetch.mockImplementation(async () => ({ items: [] }));
     setup("/movie-detail?movie=abc");
     expect(await screen.findByText("Movie not found")).toBeInTheDocument();
-    expect(apiFetch).not.toHaveBeenCalled();
+    expect(apiFetch).toHaveBeenCalledTimes(1);
     expect(screen.getByRole("link", { name: "Search movies" })).toHaveAttribute("href", "/search");
   });
 

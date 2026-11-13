@@ -119,20 +119,30 @@ export default function Screen() {
   React.useEffect(() => {
     setNote("");
     setFailed(false);
-    if (raw === null || !/^\d+$/.test(raw)) {
+    if (raw === null || raw.trim() === "") {
       setMovie(null);
       setState("notfound");
       return undefined;
     }
-    const id = Number(raw);
     let live = true;
     setState("loading");
-    Promise.all([
-      apiFetch("/movies/" + id),
-      apiFetch("/me/likes"),
-      apiFetch("/movies/" + id + "/similar"),
-    ])
-      .then(([m, likes, sim]) => {
+    const resolveId = async () => {
+      if (/^\d+$/.test(raw)) return Number(raw);
+      const wanted = raw.trim().toLowerCase();
+      const found = await apiFetch("/movies?q=" + encodeURIComponent(raw.trim()) + "&limit=100");
+      const hit = found.items.find((x) => x.title.trim().toLowerCase() === wanted);
+      if (!hit) throw new ApiError(404, "Movie not found");
+      return hit.id;
+    };
+    resolveId()
+      .then((id) =>
+        Promise.all([
+          apiFetch("/movies/" + id),
+          apiFetch("/me/likes"),
+          apiFetch("/movies/" + id + "/similar"),
+        ]).then(([m, likes, sim]) => [m, likes, sim, id]),
+      )
+      .then(([m, likes, sim, id]) => {
         if (!live) return;
         setMovie(m);
         setIsLiked(likes.items.some((x) => x.id === id));
