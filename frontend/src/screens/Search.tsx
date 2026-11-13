@@ -5,41 +5,15 @@ import React from "react";
 import * as UI from "@/lib/ui";
 import { Icons } from "@/lib/icons";
 import { brand } from "@/lib/brand";
-import { useNavigate } from "@/lib/navigate";
+import { useNavigate } from "react-router-dom";
+import { apiFetch, getSessionToken } from "@/lib/api";
+import { getUser } from "@/lib/auth";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const PAGE = 100;
+
 const { Search, Check } = Icons;
 
-const CATALOG = [
-  { id: 'm-001', title: 'Heat', year: 1995 },
-  { id: 'm-002', title: 'Heat Wave', year: 2001 },
-  { id: 'm-003', title: 'Fever Pitch', year: 2005 },
-  { id: 'm-004', title: 'The Heat', year: 2013 },
-  { id: 'm-005', title: 'Collateral', year: 2004 },
-  { id: 'm-006', title: 'The Godfather', year: 1972 },
-  { id: 'm-007', title: 'Casablanca', year: 1942 },
-  { id: 'm-008', title: 'Alien', year: 1979 },
-  { id: 'm-009', title: 'Blade Runner', year: 1982 },
-  { id: 'm-010', title: 'Jaws', year: 1975 },
-  { id: 'm-011', title: 'Goodfellas', year: 1990 },
-  { id: 'm-012', title: 'Se7en', year: 1995 },
-  { id: 'm-013', title: 'Pulp Fiction', year: 1994 },
-  { id: 'm-014', title: 'Fargo', year: 1996 },
-  { id: 'm-015', title: 'Toy Story', year: 1995 },
-  { id: 'm-016', title: 'The Matrix', year: 1999 },
-  { id: 'm-017', title: 'Gladiator', year: 2000 },
-  { id: 'm-018', title: 'Memento', year: 2000 },
-  { id: 'm-019', title: 'Amélie', year: 2001 },
-  { id: 'm-020', title: 'Spirited Away', year: 2001 },
-  { id: 'm-021', title: 'Up', year: 2009 },
-  { id: 'm-022', title: 'Inception', year: 2010 },
-  { id: 'm-023', title: 'Whiplash', year: 2014 },
-  { id: 'm-024', title: 'Arrival', year: 2016 },
-  { id: 'm-025', title: 'Parasite', year: 2019 },
-  { id: 'm-026', title: 'The Long Goodbye', year: 1973 },
-];
-
-const WF_IDS = { 'Heat': 'i-2-0-0', 'Heat Wave': 'i-2-0-1', 'Fever Pitch': 'i-2-0-2' };
+const WF_IDS = { Heat: "i-2-0-0", "Heat Wave": "i-2-0-1", "Fever Pitch": "i-2-0-2" };
 
 function hashTitle(str) {
   let h = 2166136261;
@@ -51,8 +25,14 @@ function hashTitle(str) {
 }
 
 function initials(title) {
-  const words = title.replace(/^The\s+/i, '').split(/\s+/).filter(Boolean);
-  return words.slice(0, 3).map((w) => w[0].toUpperCase()).join('');
+  const words = title
+    .replace(/^The\s+/i, "")
+    .split(/\s+/)
+    .filter(Boolean);
+  return words
+    .slice(0, 3)
+    .map((w) => w[0].toUpperCase())
+    .join("");
 }
 
 // Deterministic artwork: same title -> same image on every page and visit.
@@ -75,15 +55,36 @@ function Artwork({ title, brand }) {
     }
   }
   const uniq = new Map();
-  cells.forEach((k) => uniq.set(k.r + '-' + k.c, k));
+  cells.forEach((k) => uniq.set(k.r + "-" + k.c, k));
   return (
-    <svg viewBox="0 0 60 90" width="100%" style={{ display: 'block', aspectRatio: '2 / 3' }} aria-hidden="true" focusable="false">
+    <svg
+      viewBox="0 0 60 90"
+      width="100%"
+      style={{ display: "block", aspectRatio: "2 / 3" }}
+      aria-hidden="true"
+      focusable="false"
+    >
       <rect x="0" y="0" width="60" height="90" fill={brand.backgroundColor} />
       {Array.from(uniq.values()).map((k) => (
-        <rect key={k.r + '-' + k.c} x={k.c * 10} y={k.r * 10} width="10" height="10" fill={k.fill} />
+        <rect
+          key={k.r + "-" + k.c}
+          x={k.c * 10}
+          y={k.r * 10}
+          width="10"
+          height="10"
+          fill={k.fill}
+        />
       ))}
       <rect x="0" y="80" width="60" height="10" fill={brand.primaryColor} />
-      <text x="4" y="87.5" fontSize="7" fontWeight="700" letterSpacing="1.5" fill={brand.backgroundColor} fontFamily={brand.fontHeading}>
+      <text
+        x="4"
+        y="87.5"
+        fontSize="7"
+        fontWeight="700"
+        letterSpacing="1.5"
+        fill={brand.backgroundColor}
+        fontFamily={brand.fontHeading}
+      >
         {initials(title)}
       </text>
     </svg>
@@ -98,7 +99,9 @@ function Highlight({ text, query }) {
   return (
     <>
       {text.slice(0, i)}
-      <span style={{ textDecoration: 'underline', textDecorationThickness: 2, textUnderlineOffset: 3 }}>
+      <span
+        style={{ textDecoration: "underline", textDecorationThickness: 2, textUnderlineOffset: 3 }}
+      >
         {text.slice(i, i + q.length)}
       </span>
       {text.slice(i + q.length)}
@@ -106,40 +109,65 @@ function Highlight({ text, query }) {
   );
 }
 
-function rank(title, q) {
-  const t = title.toLowerCase();
-  if (t === q) return 0;
-  if (t.startsWith(q)) return 1;
-  return 2;
-}
-
 export default function Screen() {
   const navigate = useNavigate();
-  const [query, setQuery] = React.useState('');
+  const [query, setQuery] = React.useState("");
+  const [activeQ, setActiveQ] = React.useState("");
+  const [items, setItems] = React.useState([]);
+  const [total, setTotal] = React.useState(0);
+  const [loaded, setLoaded] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState("");
   const [submitted, setSubmitted] = React.useState(false);
-  const q = query.trim().toLowerCase();
+  const req = React.useRef(0);
+  const isAdmin = getUser()?.role === "admin";
 
-  const results = React.useMemo(() => {
-    if (!q) {
-      return [...CATALOG].sort((a, b) => a.title.localeCompare(b.title) || a.year - b.year);
-    }
-    return CATALOG.filter((m) => m.title.toLowerCase().includes(q)).sort(
-      (a, b) => rank(a.title, q) - rank(b.title, q) || a.title.localeCompare(b.title) || a.year - b.year
-    );
-  }, [q]);
+  const load = React.useCallback((text, offset) => {
+    if (!getSessionToken()) return;
+    const id = ++req.current;
+    setLoading(true);
+    setError("");
+    const params = new URLSearchParams({ q: text, limit: String(PAGE), offset: String(offset) });
+    apiFetch("/movies?" + params.toString())
+      .then((res) => {
+        if (id !== req.current) return;
+        setItems((prev) => (offset === 0 ? res.items : prev.concat(res.items)));
+        setTotal(res.total);
+        setActiveQ(text);
+        setLoaded(true);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (id !== req.current) return;
+        setError("Could not load movies. Check your connection and try again.");
+        setLoading(false);
+      });
+  }, []);
 
-  const rule = '2px solid ' + brand.primaryColor;
+  React.useEffect(() => {
+    load("", 0);
+    return () => {
+      req.current++;
+    };
+  }, [load]);
+
+  const results = items;
+  const q = activeQ.trim();
+  const showEmpty = loaded && !error && !loading && total === 0;
+
+  const rule = "2px solid " + brand.primaryColor;
   const label = {
     fontSize: 12,
     fontWeight: 700,
-    letterSpacing: '0.08em',
-    textTransform: 'uppercase',
+    letterSpacing: "0.08em",
+    textTransform: "uppercase",
     color: brand.neutralColor,
   };
 
   const onSubmit = (e) => {
     e.preventDefault();
     setSubmitted(true);
+    load(query.trim(), 0);
   };
 
   const css = `
@@ -162,16 +190,24 @@ export default function Screen() {
         fontFamily: brand.fontBody,
         color: brand.primaryColor,
         backgroundColor: brand.backgroundColor,
-        fontVariantNumeric: 'tabular-nums',
-        padding: '24px 24px 48px',
+        fontVariantNumeric: "tabular-nums",
+        padding: "24px 24px 48px",
         maxWidth: 1200,
       }}
     >
       <style>{css}</style>
 
       <header data-wf="b-0-0" style={{ borderBottom: rule, paddingBottom: 16 }}>
-        <div style={label}>Catalog · {CATALOG.length} movies</div>
-        <h1 style={{ fontSize: 36, lineHeight: 1.1, fontWeight: 700, letterSpacing: '-0.03em', margin: '8px 0 0' }}>
+        <div style={label}>Catalog{loaded && !q ? " · " + total + " movies" : ""}</div>
+        <h1
+          style={{
+            fontSize: 36,
+            lineHeight: 1.1,
+            fontWeight: 700,
+            letterSpacing: "-0.03em",
+            margin: "8px 0 0",
+          }}
+        >
           Search movies
         </h1>
       </header>
@@ -180,15 +216,23 @@ export default function Screen() {
         data-wf="b-1-0"
         role="search"
         onSubmit={onSubmit}
-        style={{ display: 'flex', gap: 8, alignItems: 'stretch', marginTop: 24, flexWrap: 'wrap' }}
+        style={{ display: "flex", gap: 8, alignItems: "stretch", marginTop: 24, flexWrap: "wrap" }}
       >
-        <div style={{ flex: '1 1 320px', minWidth: 0 }}>
-          <UI.Label htmlFor="movie-search" style={{ ...label, display: 'block', marginBottom: 8 }}>
+        <div style={{ flex: "1 1 320px", minWidth: 0 }}>
+          <UI.Label htmlFor="movie-search" style={{ ...label, display: "block", marginBottom: 8 }}>
             Title
           </UI.Label>
-          <div style={{ position: 'relative' }}>
+          <div style={{ position: "relative" }}>
             <span
-              style={{ position: 'absolute', left: 12, top: 0, bottom: 0, display: 'flex', alignItems: 'center', pointerEvents: 'none' }}
+              style={{
+                position: "absolute",
+                left: 12,
+                top: 0,
+                bottom: 0,
+                display: "flex",
+                alignItems: "center",
+                pointerEvents: "none",
+              }}
               aria-hidden="true"
             >
               <Icons.Search width={16} height={16} />
@@ -206,7 +250,7 @@ export default function Screen() {
               }}
               placeholder="Search by title, e.g. Heat"
               style={{
-                width: '100%',
+                width: "100%",
                 height: 44,
                 paddingLeft: 36,
                 paddingRight: 12,
@@ -219,19 +263,19 @@ export default function Screen() {
             />
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+        <div style={{ display: "flex", alignItems: "flex-end" }}>
           <UI.Button
             type="submit"
             style={{
               height: 44,
-              padding: '0 24px',
+              padding: "0 24px",
               backgroundColor: brand.primaryColor,
               color: brand.backgroundColor,
               border: rule,
               borderRadius: brand.radius,
               fontWeight: 700,
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase',
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
               fontSize: 13,
             }}
           >
@@ -243,37 +287,43 @@ export default function Screen() {
       <section data-wf="b-2-0" aria-labelledby="results-heading" style={{ marginTop: 32 }}>
         <div
           style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'baseline',
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "baseline",
             borderBottom: rule,
             paddingBottom: 8,
             marginBottom: 16,
             gap: 16,
-            flexWrap: 'wrap',
+            flexWrap: "wrap",
           }}
         >
           <h2 id="results-heading" style={{ ...label, color: brand.primaryColor, margin: 0 }}>
             Results
           </h2>
-          <p role="status" aria-live="polite" style={{ fontSize: 13, margin: 0, color: brand.neutralColor }}>
-            {q
-              ? results.length === 0
-                ? `0 titles contain “${query.trim()}”`
-                : `${results.length} ${results.length === 1 ? 'title contains' : 'titles contain'} “${query.trim()}”`
-              : `Showing all ${results.length} titles, A–Z`}
-            {submitted && results.length > 0 ? ' · search applied' : ''}
+          <p
+            role="status"
+            aria-live="polite"
+            style={{ fontSize: 13, margin: 0, color: brand.neutralColor }}
+          >
+            {loading && !loaded
+              ? "Loading movies…"
+              : error
+                ? ""
+                : q
+                  ? `${total} ${total === 1 ? "title contains" : "titles contain"} “${q}”`
+                  : `Showing all ${total} titles, A–Z`}
+            {submitted && total > 0 && !loading ? " · search applied" : ""}
           </p>
         </div>
 
         {results.length > 0 && (
           <ul
             style={{
-              listStyle: 'none',
+              listStyle: "none",
               margin: 0,
               padding: 0,
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
               gap: 16,
             }}
           >
@@ -283,18 +333,28 @@ export default function Screen() {
                   type="button"
                   className="wn-tile"
                   data-wf={WF_IDS[m.title]}
-                  onClick={() => navigate('movie-detail')}
+                  onClick={() => navigate("/movie-detail?movie=" + m.id)}
                   aria-label={`${m.title}, ${m.year}. Open movie details`}
-                  style={{ animationDelay: Math.min(idx, 10) * 15 + 'ms' }}
+                  style={{ animationDelay: Math.min(idx, 10) * 15 + "ms" }}
                 >
                   <div style={{ borderBottom: rule }}>
                     <Artwork title={m.title} brand={brand} />
                   </div>
-                  <div style={{ padding: '8px 8px 12px' }}>
-                    <div style={{ fontSize: 14, fontWeight: 700, lineHeight: 1.25, letterSpacing: '-0.01em' }}>
-                      <Highlight text={m.title} query={query} />
+                  <div style={{ padding: "8px 8px 12px" }}>
+                    <div
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 700,
+                        lineHeight: 1.25,
+                        letterSpacing: "-0.01em",
+                      }}
+                    >
+                      <Highlight text={m.title} query={activeQ} />
                     </div>
-                    <div className="wn-sub" style={{ fontSize: 13, marginTop: 4, color: brand.neutralColor }}>
+                    <div
+                      className="wn-sub"
+                      style={{ fontSize: 13, marginTop: 4, color: brand.neutralColor }}
+                    >
                       {m.year}
                     </div>
                   </div>
@@ -303,44 +363,83 @@ export default function Screen() {
             ))}
           </ul>
         )}
+        {loading ? <p role="status">Loading…</p> : null}
+        {error ? (
+          <p role="alert" style={{ fontWeight: 600, color: brand.accentColor }}>
+            {error}
+          </p>
+        ) : null}
+        {!loading && !error && items.length < total ? (
+          <div style={{ marginTop: 16 }}>
+            <UI.Button
+              type="button"
+              onClick={() => load(activeQ, items.length)}
+              style={{
+                height: 44,
+                padding: "0 16px",
+                backgroundColor: brand.primaryColor,
+                color: brand.backgroundColor,
+                border: rule,
+                borderRadius: brand.radius,
+                fontWeight: 700,
+                fontSize: 13,
+              }}
+            >
+              Load more
+            </UI.Button>
+          </div>
+        ) : null}
       </section>
 
-      {results.length === 0 && (
-        <div data-wf="b-3-0" style={{ border: rule, borderRadius: brand.radius, padding: 24, marginTop: 8 }}>
+      {showEmpty && (
+        <div
+          data-wf="b-3-0"
+          style={{ border: rule, borderRadius: brand.radius, padding: 24, marginTop: 8 }}
+        >
           <UI.Empty
             title="No movies found"
-            description={`Nothing in the catalog has “${query.trim()}” in its title. Check the spelling or try a shorter part of the title.`}
+            description={`Nothing in the catalog has “${activeQ.trim()}” in its title. Check the spelling or try a shorter part of the title.`}
             action={
               <UI.Button
                 type="button"
                 onClick={() => {
-                  setQuery('');
+                  setQuery("");
                   setSubmitted(false);
+                  load("", 0);
                 }}
                 style={{
                   height: 44,
-                  padding: '0 16px',
+                  padding: "0 16px",
                   backgroundColor: brand.primaryColor,
                   color: brand.backgroundColor,
                   border: rule,
                   borderRadius: brand.radius,
                   fontWeight: 700,
                   fontSize: 13,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.04em',
+                  textTransform: "uppercase",
+                  letterSpacing: "0.04em",
                 }}
               >
                 Clear search
               </UI.Button>
             }
           />
-          <p style={{ fontSize: 13, color: brand.neutralColor, margin: '16px 0 0', textAlign: 'center' }}>
-            Missing a title? Admins can{' '}
-            <button type="button" className="wn-link" onClick={() => navigate('admin-upload')}>
-              upload movies
-            </button>
-            .
-          </p>
+          {isAdmin ? (
+            <p
+              style={{
+                fontSize: 13,
+                color: brand.neutralColor,
+                margin: "16px 0 0",
+                textAlign: "center",
+              }}
+            >
+              Missing a title? Admins can{" "}
+              <button type="button" className="wn-link" onClick={() => navigate("/admin-upload")}>
+                upload movies
+              </button>
+              .
+            </p>
+          ) : null}
         </div>
       )}
     </div>

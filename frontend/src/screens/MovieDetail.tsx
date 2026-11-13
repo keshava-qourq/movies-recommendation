@@ -377,6 +377,20 @@ export default function Screen() {
   }, [movieId]);
 
   React.useEffect(() => {
+    if (!/^\d+$/.test(initial)) return;
+    let live = true;
+    apiFetch("/movies/" + initial)
+      .then((row) => {
+        const c = CATALOG.find((m) => m.title.toLowerCase() === String(row.title).toLowerCase());
+        if (live && c) setMovieId(c.id);
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [initial]);
+
+  React.useEffect(() => {
     let live = true;
     apiFetch("/me/likes")
       .then((res) => {
