@@ -81,10 +81,15 @@ test("[AC-008][NFR-002] logout revokes the token, protected page redirects, seco
   const oldToken = await page.evaluate(() => localStorage.getItem("session_token"));
   expect(oldToken).toBeTruthy();
 
-  await page.getByRole("button", { name: /log out/i }).first().click();
+  await page
+    .getByRole("button", { name: /log out/i })
+    .first()
+    .click();
   await expect(page).toHaveURL(/\/login/);
 
-  const me = await request.get(`${API}/auth/me`, { headers: { Authorization: `Bearer ${oldToken}` } });
+  const me = await request.get(`${API}/auth/me`, {
+    headers: { Authorization: `Bearer ${oldToken}` },
+  });
   expect(me.status()).toBe(401);
 
   await page.goto("/for-you");
@@ -105,7 +110,9 @@ test("[AC-010][NFR-004] signed out, For you, Search and Upload redirect to login
   }
 });
 
-test("[AC-010][NFR-004] signed out API calls return 401 and change nothing", async ({ request }) => {
+test("[AC-010][NFR-004] signed out API calls return 401 and change nothing", async ({
+  request,
+}) => {
   const u = await signupApi(request);
   const auth = { Authorization: `Bearer ${u.token}` };
   const before = await (await request.get(`${API}/me/likes`, { headers: auth })).json();
