@@ -16,6 +16,7 @@ from app.bootstrap import seed_users
 from app.config import get_settings
 from app.database import SessionLocal
 from app.migrations.runner import upgrade_to_head
+from app.routers import auth, movies
 
 
 @asynccontextmanager
@@ -52,6 +53,10 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
 )
+
+
+app.include_router(auth.router)
+app.include_router(movies.router)
 
 
 @app.get("/health")

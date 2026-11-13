@@ -26,10 +26,13 @@ class Settings:
     # One normal (viewer) user for smoke tests, created on startup when both are set.
     smoke_test_email: str | None
     smoke_test_password: str | None
+    # Minutes without an authenticated request before a session expires.
+    session_idle_minutes: int = 30
 
 
 def get_settings() -> Settings:
-    origins = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
+    raw = os.getenv("CORS_ALLOWED_ORIGINS", "").strip() or os.getenv("ALLOWED_ORIGINS", "")
+    origins = [o.strip() for o in raw.split(",") if o.strip()]
     return Settings(
         allowed_origins=origins or list(_DEV_ORIGINS),
         secret_key=os.getenv("SECRET_KEY", "local-dev-shared-bearer"),
@@ -37,4 +40,5 @@ def get_settings() -> Settings:
         bootstrap_admin_password=_optional("BOOTSTRAP_ADMIN_PASSWORD"),
         smoke_test_email=_optional("SMOKE_TEST_EMAIL"),
         smoke_test_password=_optional("SMOKE_TEST_PASSWORD"),
+        session_idle_minutes=int(os.getenv("SESSION_IDLE_MINUTES", "30") or 30),
     )

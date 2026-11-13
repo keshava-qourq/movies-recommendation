@@ -1,4 +1,8 @@
-import { NavLink, Navigate, Outlet, Route, Routes } from "react-router-dom";
+import React from "react";
+import { NavLink, Navigate, Outlet, Route, Routes, useNavigate } from "react-router-dom";
+
+import { apiFetch, getSessionToken, setUnauthorizedHandler, type AuthUser } from "@/lib/api";
+import { SESSION_EXPIRED_NOTICE, logout, setNotice, setUser } from "@/lib/auth";
 
 import { Icons } from "@/lib/icons";
 import Login from "@/screens/Login";
@@ -15,7 +19,8 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   ].join(" ");
 
 // The app's menu, drawn around every screen except the ones routed outside it below.
-function AppShellLayout() {
+function AppShellLayout({ user }: { user: AuthUser }) {
+  const navigate = useNavigate();
   return (
     <div className="flex min-h-screen flex-col">
       <header
@@ -40,10 +45,19 @@ function AppShellLayout() {
               <Icons.Search size={16} />
               {"Search"}
             </NavLink>
-            <NavLink to="/admin-upload" className={navLinkClass}>
-              <Icons.Plus size={16} />
-              {"Upload movies"}
-            </NavLink>
+            {user.role === "admin" ? (
+              <NavLink to="/admin-upload" className={navLinkClass}>
+                <Icons.Plus size={16} />
+                {"Upload movies"}
+              </NavLink>
+            ) : null}
+            <button
+              type="button"
+              className={navLinkClass({ isActive: false })}
+              onClick={() => logout().then(() => navigate("/login", { replace: true }))}
+            >
+              {"Log out"}
+            </button>
           </nav>
         </div>
       </header>
@@ -54,10 +68,47 @@ function AppShellLayout() {
   );
 }
 
+// Keeps signed-out users off the pages: no token redirects at once, a token is checked with /auth/me.
+function RequireAuth() {
+  const [user, setGuardUser] = React.useState<AuthUser | null>(null);
+  const [rejected, setRejected] = React.useState(false);
+  const hasToken = getSessionToken() !== null;
+
+  React.useEffect(() => {
+    if (!hasToken) return;
+    let live = true;
+    apiFetch<AuthUser>("/auth/me")
+      .then((me) => {
+        if (!live) return;
+        setUser(me);
+        setGuardUser(me);
+      })
+      .catch(() => {
+        if (live) setRejected(true);
+      });
+    return () => {
+      live = false;
+    };
+  }, [hasToken]);
+
+  if (!hasToken || rejected) return <Navigate to="/login" replace />;
+  if (!user) return null;
+  return <AppShellLayout user={user} />;
+}
+
 export default function App() {
+  const navigate = useNavigate();
+  React.useEffect(() => {
+    setUnauthorizedHandler(() => {
+      setUser(null);
+      setNotice(SESSION_EXPIRED_NOTICE);
+      navigate("/login", { replace: true });
+    });
+    return () => setUnauthorizedHandler(null);
+  }, [navigate]);
   return (
     <Routes>
-      <Route element={<AppShellLayout />}>
+      <Route element={<RequireAuth />}>
         <Route path="/for-you" element={<ForYou />} />
         <Route path="/search" element={<Search />} />
         <Route path="/movie-detail" element={<MovieDetail />} />
