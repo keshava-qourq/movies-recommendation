@@ -13,13 +13,12 @@ down_revision = None
 branch_labels = None
 depends_on = None
 
-BigInt = sa.BigInteger().with_variant(sa.Integer(), "sqlite")
+BigInt = sa.BigInteger()
 
 
 def upgrade() -> None:
-    pg = op.get_bind().dialect.name == "postgresql"
-    empty_list = sa.text("'{}'") if pg else sa.text("'[]'")
-    text_list = postgresql.ARRAY(sa.Text()).with_variant(sa.JSON(), "sqlite")
+    empty_list = sa.text("'{}'")
+    text_list = postgresql.ARRAY(sa.Text())
     op.create_table(
         "users",
         sa.Column("id", BigInt, sa.Identity(always=True), primary_key=True),

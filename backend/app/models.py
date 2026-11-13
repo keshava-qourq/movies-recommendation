@@ -6,7 +6,6 @@ Any change here needs a matching Alembic migration in `app/migrations/versions`.
 from datetime import UTC, datetime
 
 from sqlalchemy import (
-    JSON,
     CheckConstraint,
     DateTime,
     ForeignKey,
@@ -27,7 +26,7 @@ from app.database import Base
 
 
 class UTCDateTime(TypeDecorator):
-    """timestamptz that comes back timezone-aware on SQLite too (which drops the zone)."""
+    """timestamptz that always comes back timezone-aware."""
 
     impl = DateTime(timezone=True)
     cache_ok = True
@@ -38,8 +37,6 @@ class UTCDateTime(TypeDecorator):
         return value
 
 
-# PostgreSQL arrays; a JSON list on SQLite.
-TextList = ARRAY(Text).with_variant(JSON(), "sqlite")
 
 
 class User(Base):
@@ -77,9 +74,9 @@ class Movie(Base):
     # Lowercased, trimmed title; unique together with year.
     title_key: Mapped[str] = mapped_column(String(300))
     year: Mapped[int] = mapped_column(SmallInteger)
-    genres: Mapped[list[str]] = mapped_column(TextList, server_default=text("'{}'"))
+    genres: Mapped[list[str]] = mapped_column(ARRAY(Text), server_default=text("'{}'"))
     director: Mapped[str] = mapped_column(String(200), server_default="")
-    cast_members: Mapped[list[str]] = mapped_column(TextList, server_default=text("'{}'"))
+    cast_members: Mapped[list[str]] = mapped_column(ARRAY(Text), server_default=text("'{}'"))
     plot: Mapped[str] = mapped_column(Text, server_default="")
     created_at: Mapped[datetime] = mapped_column(UTCDateTime(), server_default=func.now())
 
