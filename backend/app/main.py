@@ -12,7 +12,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.bootstrap import seed_users
+from app.bootstrap import seed_movies, seed_users
 from app.config import get_settings
 from app.database import SessionLocal
 from app.migrations.runner import upgrade_to_head
@@ -29,6 +29,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     upgrade_to_head()
     with SessionLocal() as db:
         seed_users(db)
+        seed_movies(db)
     yield
 
 
