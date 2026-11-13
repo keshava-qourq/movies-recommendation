@@ -30,3 +30,4 @@ when a test and the code disagreed.
 - Timestamps are stored as UTC timestamptz and any returned in JSON are ISO 8601 UTC with a Z suffix, and the movie `year` is a plain integer.
 - The admin upload counts rows from 1 for the first data row after the header, reads the file as UTF-8, and returns 400 when the file is not CSV or the header lacks a required column.
 - Tests create their own users and movies through the API (signup, and the upload endpoint with a seeded admin from server config) with a unique email per test such as a random suffix, never write to the database directly, and never rely on data from another test.
+- Style-only fix in the test file: wrap the long line (for example, assign the logout response to a variable and then assert its status code is 204). Do not change app code. (decided in US-001)
