@@ -45,23 +45,6 @@ def list_movies(
     return {"items": [_movie_out(m) for m in rows], "total": total}
 
 
-@router.get("/movies/{movie_id}")
-def movie_detail(movie_id: str, db: Annotated[Session, Depends(get_db)]) -> dict[str, Any]:
-    try:
-        mid = int(movie_id)
-    except ValueError:
-        raise HTTPException(status_code=404, detail="Movie not found") from None
-    m = db.get(Movie, mid) if -(2**63) <= mid < 2**63 else None
-    if m is None:
-        raise HTTPException(status_code=404, detail="Movie not found")
-    return _movie_out(m)
-
-
-@router.get("/me/for-you")
-def for_you() -> dict[str, Any]:
-    return {"items": []}
-
-
 def _find_movie(db: Session, movie_id: str) -> Movie:
     try:
         mid = int(movie_id)
@@ -71,6 +54,16 @@ def _find_movie(db: Session, movie_id: str) -> Movie:
     if m is None:
         raise HTTPException(status_code=404, detail="Movie not found")
     return m
+
+
+@router.get("/movies/{movie_id}")
+def movie_detail(movie_id: str, db: Annotated[Session, Depends(get_db)]) -> dict[str, Any]:
+    return _movie_out(_find_movie(db, movie_id))
+
+
+@router.get("/me/for-you")
+def for_you() -> dict[str, Any]:
+    return {"items": []}
 
 
 @router.post("/movies/{movie_id}/like")
