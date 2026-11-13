@@ -2,7 +2,7 @@ import React from "react";
 import { NavLink, Navigate, Outlet, Route, Routes, useNavigate } from "react-router-dom";
 
 import { apiFetch, getSessionToken, setUnauthorizedHandler, type AuthUser } from "@/lib/api";
-import { SESSION_EXPIRED_NOTICE, logout, setNotice, setUser } from "@/lib/auth";
+import { SESSION_EXPIRED_NOTICE, getUser, logout, setNotice, setUser } from "@/lib/auth";
 
 import { Icons } from "@/lib/icons";
 import Login from "@/screens/Login";
@@ -96,6 +96,11 @@ function RequireAuth() {
   return <AppShellLayout user={user} />;
 }
 
+// Only admins may open the upload page; everyone else goes back to For you.
+function RequireAdmin({ children }: { children: React.ReactElement }) {
+  return getUser()?.role === "admin" ? children : <Navigate to="/for-you" replace />;
+}
+
 export default function App() {
   const navigate = useNavigate();
   React.useEffect(() => {
@@ -112,7 +117,14 @@ export default function App() {
         <Route path="/for-you" element={<ForYou />} />
         <Route path="/search" element={<Search />} />
         <Route path="/movie-detail" element={<MovieDetail />} />
-        <Route path="/admin-upload" element={<AdminUpload />} />
+        <Route
+          path="/admin-upload"
+          element={
+            <RequireAdmin>
+              <AdminUpload />
+            </RequireAdmin>
+          }
+        />
       </Route>
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />

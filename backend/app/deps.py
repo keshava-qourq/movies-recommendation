@@ -1,6 +1,6 @@
 """Authentication dependencies: the session behind a Bearer token, and the admin check."""
 
-from datetime import timedelta
+from datetime import UTC, timedelta
 from typing import Annotated
 
 from fastapi import Depends, Header, HTTPException
@@ -34,7 +34,10 @@ def get_current_session(
         raise _unauthenticated()
     now = security.utcnow()
     idle = timedelta(minutes=get_settings().session_idle_minutes)
-    if now - session.last_seen_at > idle:
+    last_seen = session.last_seen_at
+    if last_seen.tzinfo is None:
+        last_seen = last_seen.replace(tzinfo=UTC)
+    if now - last_seen > idle:
         raise _unauthenticated()
     session.last_seen_at = now
     db.commit()

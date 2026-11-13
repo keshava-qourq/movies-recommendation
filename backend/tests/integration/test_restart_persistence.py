@@ -91,6 +91,23 @@ def test_ac023_nfr011_no_extra_service_in_compose_or_docs() -> None:
         assert banned not in compose, banned
 
 
+def test_ac023_readme_names_no_extra_service() -> None:
+    readme = (ROOT / "README.md").read_text(encoding="utf-8").lower()
+    for banned in ("redis", "meilisearch", "rabbitmq", "kafka", "elasticsearch"):
+        assert banned not in readme, banned
+
+
+def test_nfr011_readme_covers_required_topics() -> None:
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    low = readme.lower()
+    assert "BOOTSTRAP_ADMIN_EMAIL" in readme and "BOOTSTRAP_ADMIN_PASSWORD" in readme
+    assert "session" in low and "30 minutes" in low
+    assert "csv" in low and "header" in low
+    assert "known limits" in low
+    for topic in ("install", "start"):
+        assert topic in low
+
+
 def test_nfr013_documentation_is_english_latin() -> None:
     text = (ROOT / "README.md").read_text(encoding="utf-8")
     assert all(ord(ch) < 0x250 or ch in "–—‘’“”…•→✓" for ch in text)

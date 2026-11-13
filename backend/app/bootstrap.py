@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 
 from app.config import Settings, get_settings
 from app.models import Movie, User
-from app.security import hash_password
+from app.security import hash_password, normalize_email
 
 logger = logging.getLogger("app.bootstrap")
 
@@ -44,12 +44,17 @@ def seed_movies(db: Session, path: Path = SAMPLE_MOVIES_PATH) -> int:
             )
         )
         added += 1
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        # Another worker seeded the catalog first.
+        db.rollback()
+        return 0
     return added
 
 
 def _ensure_user(db: Session, email: str, password: str, role: str) -> bool:
-    email = email.strip().lower()
+    email = normalize_email(email)
     if db.scalar(select(User.id).where(User.email == email)) is not None:
         return False
     db.add(User(email=email, password_hash=hash_password(password), role=role))
