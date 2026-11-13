@@ -41,9 +41,8 @@ export default defineConfig({
     ? undefined
     : [
       {
-        // The generated backend defaults to a local SQLite database (see
-        // backend/app/database.py), so the API runs end to end with no database
-        // server to stand up. Its packages are in backend/.venv (installed before the run).
+        // The backend runs against the PostgreSQL that DATABASE_URL names (migrations
+        // run on startup). Its packages are in backend/.venv (installed before the run).
         command:
           "cd ../backend && .venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000",
         url: "http://127.0.0.1:8000/health",
