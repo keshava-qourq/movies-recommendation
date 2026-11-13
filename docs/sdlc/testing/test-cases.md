@@ -3,7 +3,7 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-58 tests · Passed 58 · Failed 0 · Skipped 0 · Not run 0
+77 tests · Passed 77 · Failed 0 · Skipped 0 · Not run 0
 
 Acceptance criteria covered: 15/64 · passing: 15/64
 <!-- sdlc:auto:end summary -->
@@ -19,10 +19,12 @@ Acceptance criteria covered: 15/64 · passing: 15/64
 | AC-009 | test_ac009_idle_boundary_and_refresh | Unit | Passed | `backend/tests/unit/test_deps.py` |
 | AC-010 | test_ac010_bad_headers_are_401_with_challenge | Unit | Passed | `backend/tests/unit/test_deps.py` |
 | NFR-005 | test_nfr005_require_admin_refuses_viewer | Unit | Passed | `backend/tests/unit/test_deps.py` |
+| AC-003 | test_ac003_login_accepts_malformed_email_and_signup_rejects | Unit | Passed | `backend/tests/unit/test_schemas.py` |
 | AC-002 | test_ac002_email_normalisation_trims_and_lowercases | Unit | Passed | `backend/tests/unit/test_security.py` |
 | AC-005 | test_ac005_password_hash_is_salted_argon2 | Unit | Passed | `backend/tests/unit/test_security.py` |
 | — | test_session_token_is_long_and_hashed_sha256 | Unit | Passed | `backend/tests/unit/test_security.py` |
 | — | test_utcnow_is_timezone_aware | Unit | Passed | `backend/tests/unit/test_security.py` |
+| AC-005, NFR-001 | test_ac005_nfr001_seeded_passwords_are_stored_as_salted_argon2 | Unit | Passed | `backend/tests/unit/test_seed_passwords.py` |
 | AC-008 | App > [AC-008] logout clears the token even when the call fails | Unit | Passed | `frontend/src/App.test.tsx` |
 | AC-009 | App > [AC-009] a 401 from /auth/me redirects to login with the expiry notice | Unit | Passed | `frontend/src/App.test.tsx` |
 | AC-010 | App > [AC-010] redirects to login without a token and renders no page | Unit | Passed | `frontend/src/App.test.tsx` |
@@ -54,6 +56,25 @@ Acceptance criteria covered: 15/64 · passing: 15/64
 | NFR-002 | test_nfr002_logout_ends_session | Integration | Passed | `backend/tests/integration/test_auth_api.py` |
 | NFR-004 | test_nfr004_movie_features_refuse_signed_out_users | Integration | Passed | `backend/tests/integration/test_auth_api.py` |
 | NFR-013, NFR-015 | test_nfr013_nfr015_validation_messages_are_specific_english | Integration | Passed | `backend/tests/integration/test_auth_api.py` |
+| AC-001 | [AC-001] new visitor signs up and lands signed in on For you | E2E | Passed | `frontend/e2e/signup.spec.ts` |
+| AC-002, NFR-013, NFR-015 | [AC-002][NFR-013][NFR-015] duplicate email in another letter case shows already-registered message | E2E | Passed | `frontend/e2e/signup.spec.ts` |
+| AC-003, NFR-015 | [AC-003][NFR-015] 7-character password shows a specific message and creates no account | E2E | Passed | `frontend/e2e/signup.spec.ts` |
+| AC-003, NFR-015 | [AC-003][NFR-015] invalid email shows a specific message and creates no account | E2E | Passed | `frontend/e2e/signup.spec.ts` |
+| AC-004, NFR-005 | [AC-004][NFR-005] signed-up user is a viewer with no Upload entry | E2E | Passed | `frontend/e2e/signup.spec.ts` |
+| AC-004, NFR-005 | [AC-004][NFR-005] signup request carrying role admin still yields viewer | E2E | Passed | `frontend/e2e/signup.spec.ts` |
+
+### US-002: Log in and log out
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-006, NFR-013 | [AC-006][NFR-013] login with email in another letter case lands on For you | E2E | Passed | `frontend/e2e/login.spec.ts` |
+| AC-007, NFR-003 | [AC-007][NFR-003] wrong password and unknown email show the identical message and 401 body | E2E | Passed | `frontend/e2e/login.spec.ts` |
+| AC-008, NFR-002 | [AC-008][NFR-002] logout revokes the token, protected page redirects, second session stays valid | E2E | Passed | `frontend/e2e/login.spec.ts` |
+| AC-009, NFR-002 | [AC-009][NFR-002] a revoked or unknown token sends the user to login with the expired notice | E2E | Passed | `frontend/e2e/login.spec.ts` |
+| AC-010, NFR-004 | [AC-010][NFR-004] signed out API calls return 401 and change nothing | E2E | Passed | `frontend/e2e/login.spec.ts` |
+| AC-010, NFR-004 | [AC-010][NFR-004] signed out, For you, Search and Upload redirect to login | E2E | Passed | `frontend/e2e/login.spec.ts` |
+| NFR-005 | [NFR-005] a viewer has no Upload entry and is refused the admin page | E2E | Passed | `frontend/e2e/login.spec.ts` |
+| NFR-005 | [NFR-005] the bootstrap admin signs in and sees the Upload entry | E2E | Passed | `frontend/e2e/login.spec.ts` |
 
 ### US-005: Sample catalog available after install
 
@@ -73,10 +94,13 @@ Acceptance criteria covered: 15/64 · passing: 15/64
 
 | Criteria | Test | Level | Result | File |
 |---|---|---|---|---|
+| AC-023, NFR-011 | test_ac023_nfr011_session_idle_and_cors_settings | Unit | Passed | `backend/tests/unit/test_config_settings.py` |
 | AC-023, NFR-011 | test_ac023_nfr011_no_extra_service_in_compose_or_docs | Integration | Passed | `backend/tests/integration/test_restart_persistence.py` |
+| AC-023 | test_ac023_readme_names_no_extra_service | Integration | Passed | `backend/tests/integration/test_restart_persistence.py` |
 | AC-024 | test_ac024_accounts_and_sample_movies_survive_restart | Integration | Passed | `backend/tests/integration/test_restart_persistence.py` |
 | AC-024 | test_ac024_likes_survive_restart | Integration | Passed | `backend/tests/integration/test_restart_persistence.py` |
 | AC-024, NFR-010 | test_ac024_nfr010_first_admin_and_catalog_not_duplicated | Integration | Passed | `backend/tests/integration/test_restart_persistence.py` |
+| NFR-011 | test_nfr011_readme_covers_required_topics | Integration | Passed | `backend/tests/integration/test_restart_persistence.py` |
 | NFR-013 | test_nfr013_documentation_is_english_latin | Integration | Passed | `backend/tests/integration/test_restart_persistence.py` |
 
 ## Project setup

@@ -21,7 +21,7 @@ no movie APIs, no poster images from the web, no email sending, no
 third-party login, and no AI or LLM calls. Ship a built-in sample of about
 50 well-known movies with the app, so it works right after install.
 
-**Documentation version:** v5
+**Documentation version:** v6
 <!-- sdlc:auto:end overview -->
 
 ## Contents
@@ -41,12 +41,12 @@ third-party login, and no AI or LLM calls. Ship a built-in sample of about
 | [Decisions (ADRs)](architecture/adr/README.md) | 5 decisions |
 | [Sprint plan](development/sprint-plan.md) | 4 sprints |
 | [Developer guide](development/developer-guide.md) | generated |
-| [API reference](development/api-reference.md) | 1 route |
+| [API reference](development/api-reference.md) | 12 routes |
 | [Test report](testing/test-report.md) | not run yet |
-| [Tests](testing/test-cases.md) | 58 tests |
+| [Tests](testing/test-cases.md) | 77 tests |
 | [Deployment guide](deployment/deployment-guide.md) | deployed |
 | [Runbook](deployment/runbook.md) | deployed |
 | [Release notes](deployment/release-notes.md) | 2 releases |
 | [Traceability matrix](traceability-matrix.md) | 18 requirements |
-| [Changelog](CHANGELOG.md) | 5 versions |
+| [Changelog](CHANGELOG.md) | 6 versions |
 <!-- sdlc:auto:end contents -->

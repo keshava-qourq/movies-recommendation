@@ -5,26 +5,31 @@
 <!-- sdlc:auto:start endpoints -->
 | Method | Path | Handler | Source | Summary |
 |---|---|---|---|---|
-| GET | /health | health | `backend/app/main.py:57` | Liveness probe, and the only route here that is not a stub. |
+| POST | /auth/login | login | `backend/app/routers/auth.py:67` | — |
+| POST | /auth/logout | logout | `backend/app/routers/auth.py:39` | — |
+| GET | /auth/me | me | `backend/app/routers/auth.py:46` | — |
+| POST | /auth/signup | signup | `backend/app/routers/auth.py:51` | — |
+| GET | /health | health | `backend/app/main.py:61` | Liveness probe. |
+| GET | /me/for-you | for_you | `backend/app/routers/movies.py:89` | — |
+| GET | /me/likes | likes | `backend/app/routers/movies.py:144` | — |
+| GET | /movies | list_movies | `backend/app/routers/movies.py:33` | — |
+| GET | /movies/{movie_id} | movie_detail | `backend/app/routers/movies.py:63` | — |
+| DELETE | /movies/{movie_id}/like | unlike_movie | `backend/app/routers/movies.py:130` | — |
+| POST | /movies/{movie_id}/like | like_movie | `backend/app/routers/movies.py:114` | — |
+| PUT | /movies/{movie_id}/like | like_movie | `backend/app/routers/movies.py:113` | — |
 <!-- sdlc:auto:end endpoints -->
 
 <!-- sdlc:auto:start drift -->
 **Designed but missing:**
 
-- DELETE /movies/{movie_id}/like
-- GET /auth/me
-- GET /me/for-you
-- GET /me/likes
-- GET /movies
-- GET /movies/{movie_id}
 - GET /movies/{movie_id}/similar
 - POST /admin/movies/upload
-- POST /auth/login
-- POST /auth/logout
-- POST /auth/signup
-- PUT /movies/{movie_id}/like
+
+**Code only:**
+
+- POST /movies/{movie_id}/like
 <!-- sdlc:auto:end drift -->
 
 <!-- sdlc:auto:start source -->
-Generated from commit `e4a8a8c`
+Generated from commit `49dd10d`
 <!-- sdlc:auto:end source -->
