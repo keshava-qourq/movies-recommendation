@@ -3,7 +3,7 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-57 tests · Passed 57 · Failed 0 · Skipped 0 · Not run 0
+58 tests · Passed 58 · Failed 0 · Skipped 0 · Not run 0
 
 Acceptance criteria covered: 15/64 · passing: 15/64
 <!-- sdlc:auto:end summary -->
@@ -75,6 +75,7 @@ Acceptance criteria covered: 15/64 · passing: 15/64
 |---|---|---|---|---|
 | AC-023, NFR-011 | test_ac023_nfr011_no_extra_service_in_compose_or_docs | Integration | Passed | `backend/tests/integration/test_restart_persistence.py` |
 | AC-024 | test_ac024_accounts_and_sample_movies_survive_restart | Integration | Passed | `backend/tests/integration/test_restart_persistence.py` |
+| AC-024 | test_ac024_likes_survive_restart | Integration | Passed | `backend/tests/integration/test_restart_persistence.py` |
 | AC-024, NFR-010 | test_ac024_nfr010_first_admin_and_catalog_not_duplicated | Integration | Passed | `backend/tests/integration/test_restart_persistence.py` |
 | NFR-013 | test_nfr013_documentation_is_english_latin | Integration | Passed | `backend/tests/integration/test_restart_persistence.py` |
 
