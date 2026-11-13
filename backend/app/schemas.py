@@ -10,7 +10,7 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 class Credentials(BaseModel):
     """Login body. Extra fields are ignored; the password is never trimmed."""
 
-    email: EmailStr
+    email: str
     password: str
 
     @field_validator("email", mode="before")
@@ -20,6 +20,7 @@ class Credentials(BaseModel):
 
 
 class SignupRequest(Credentials):
+    email: EmailStr
     password: str = Field(min_length=8)
 
 
