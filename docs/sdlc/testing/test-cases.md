@@ -3,9 +3,9 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-77 tests · Passed 77 · Failed 0 · Skipped 0 · Not run 0
+133 tests · Passed 131 · Failed 2 · Skipped 0 · Not run 0
 
-Acceptance criteria covered: 15/64 · passing: 15/64
+Acceptance criteria covered: 36/64 · passing: 34/64
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
@@ -102,6 +102,94 @@ Acceptance criteria covered: 15/64 · passing: 15/64
 | AC-024, NFR-010 | test_ac024_nfr010_first_admin_and_catalog_not_duplicated | Integration | Passed | `backend/tests/integration/test_restart_persistence.py` |
 | NFR-011 | test_nfr011_readme_covers_required_topics | Integration | Passed | `backend/tests/integration/test_restart_persistence.py` |
 | NFR-013 | test_nfr013_documentation_is_english_latin | Integration | Passed | `backend/tests/integration/test_restart_persistence.py` |
+
+## Sprint 2
+
+### US-003: First admin account from server config
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-011 | test_ac011_admin_created_and_can_log_in | Integration | Passed | `backend/tests/unit/test_first_admin.py` |
+| AC-012 | test_ac012_restarts_keep_one_admin_and_hash | Integration | Passed | `backend/tests/unit/test_first_admin.py` |
+| AC-013 | test_ac013_unset_or_half_set_warns_and_seeds_nothing | Integration | Passed | `backend/tests/unit/test_first_admin.py` |
+| AC-014 | test_ac014_require_admin_401_403_and_signup_never_admin | Integration | Passed | `backend/tests/unit/test_first_admin.py` |
+| — | test_smoke_viewer_seeded_once_and_not_when_unset | Integration | Passed | `backend/tests/unit/test_first_admin.py` |
+| AC-011, NFR-005 | [AC-011][NFR-005] the first admin signs in on the login screen and sees Upload movies | E2E | Passed | `frontend/e2e/first-admin.spec.ts` |
+| AC-014, NFR-005 | [AC-014][NFR-005] a signed-out visit to /admin-upload ends on the login screen | E2E | Passed | `frontend/e2e/first-admin.spec.ts` |
+| AC-014, NFR-005 | [AC-014][NFR-005] a signup viewer has no Upload movies item and /admin-upload redirects to For you | E2E | Passed | `frontend/e2e/first-admin.spec.ts` |
+| AC-015, NFR-005 | [AC-015][NFR-005] signup creates a viewer, never an admin | E2E | Passed | `frontend/e2e/first-admin.spec.ts` |
+| NFR-001 | [NFR-001] signup and /auth/me never return the password or a hash | E2E | Passed | `frontend/e2e/nfr.spec.ts` |
+| NFR-010 | [NFR-010] the first admin exists once and the sample catalog has no duplicates | E2E | Passed | `frontend/e2e/nfr.spec.ts` |
+| NFR-013 | [NFR-013] login and signup screens are English only | E2E | Passed | `frontend/e2e/nfr.spec.ts` |
+
+### US-004: No password reset or email verification
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-015 | [AC-015] login and signup offer no reset or verification option and send no email request | E2E | Passed | `frontend/e2e/no-reset-verification.spec.ts` |
+| AC-015 | [AC-015] signing up makes no reset, verify or email API call | E2E | Passed | `frontend/e2e/no-reset-verification.spec.ts` |
+| AC-016, NFR-013 | [AC-016][NFR-013] a new account uses the app immediately with no verification step | E2E | Passed | `frontend/e2e/no-reset-verification.spec.ts` |
+
+### US-008: Search movies by title
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-025 | Search > [AC-025] submitting Heat calls GET /movies?q=Heat and lists Heat | Unit | Passed | `frontend/src/screens/Search.test.tsx` |
+| AC-026 | Search > [AC-026] a result opens the detail screen by numeric id | Unit | Passed | `frontend/src/screens/Search.test.tsx` |
+| AC-026 | Search > [AC-026] lists title and year, shows total and pages with Load more | Unit | Passed | `frontend/src/screens/Search.test.tsx` |
+| AC-027 | Search > [AC-027] a failed request shows an error, not No movies found | Unit | Passed | `frontend/src/screens/Search.test.tsx` |
+| AC-027 | Search > [AC-027] shows No movies found when total is 0 | Unit | Passed | `frontend/src/screens/Search.test.tsx` |
+| AC-027 | Search > [AC-027] upload hint is hidden for non-admins | Unit | Passed | `frontend/src/screens/Search.test.tsx` |
+| AC-028 | Search > [AC-028] makes no request without a session token | Unit | Passed | `frontend/src/screens/Search.test.tsx` |
+| AC-025 | [AC-025] clicking a result opens the movie detail page | E2E | Passed | `frontend/e2e/search.spec.ts` |
+| AC-025 | [AC-025] searching heat and HEAT both list the movie Heat | E2E | Passed | `frontend/e2e/search.spec.ts` |
+| AC-026 | [AC-026] every movie whose title contains the text is listed with title and year | E2E | Passed | `frontend/e2e/search.spec.ts` |
+| AC-027 | [AC-027] a nonsense string shows No movies found | E2E | Passed | `frontend/e2e/search.spec.ts` |
+| AC-028, NFR-004 | [AC-028][NFR-004] a signed-out visit to /search ends on the login screen | E2E | Passed | `frontend/e2e/search.spec.ts` |
+| NFR-013 | [NFR-013] the search screen is English only | E2E | Passed | `frontend/e2e/search.spec.ts` |
+
+### US-009: Movie detail page
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-029 | MovieDetail > [AC-029] a failed like keeps the state and shows an error | Unit | Passed | `frontend/src/screens/MovieDetail.test.tsx` |
+| AC-029 | MovieDetail > [AC-029] a title param is resolved through the movie lookup | Unit | Passed | `frontend/src/screens/MovieDetail.test.tsx` |
+| AC-029 | MovieDetail > [AC-029] like then unlike use PUT and DELETE and update after success | Unit | Passed | `frontend/src/screens/MovieDetail.test.tsx` |
+| AC-029 | MovieDetail > [AC-029] shows an empty state when there are no similar movies | Unit | Passed | `frontend/src/screens/MovieDetail.test.tsx` |
+| AC-029 | MovieDetail > [AC-029] shows the movie details and the liked state from /me/likes | Unit | Passed | `frontend/src/screens/MovieDetail.test.tsx` |
+| AC-029 | MovieDetail > [AC-029] similar movies show score and open the detail page; empty state otherwise | Unit | Passed | `frontend/src/screens/MovieDetail.test.tsx` |
+| AC-030 | MovieDetail > [AC-030] uses generated SVG artwork with no image or upload control | Unit | Passed | `frontend/src/screens/MovieDetail.test.tsx` |
+| AC-031 | MovieDetail > [AC-031] a 404 from the API shows Movie not found | Unit | Passed | `frontend/src/screens/MovieDetail.test.tsx` |
+| AC-031 | MovieDetail > [AC-031] an unmatched title shows Movie not found | Unit | Passed | `frontend/src/screens/MovieDetail.test.tsx` |
+| AC-029 | [AC-029] Similar movies lists at most 10 and selecting one opens its detail page | E2E | Passed | `frontend/e2e/movie-detail.spec.ts` |
+| AC-029 | [AC-029] opening a movie from search shows its details and a like control | E2E | Passed | `frontend/e2e/movie-detail.spec.ts` |
+| AC-030 | [AC-030] generated placeholder image, no third-party requests, no upload control | E2E | Passed | `frontend/e2e/movie-detail.spec.ts` |
+| NFR-013 | [NFR-013] the movie not found message screen is English only | E2E | Passed | `frontend/e2e/movie-detail.spec.ts` |
+
+### US-012: Similarity computed in-house
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-039 | test_ac039_each_field_changes_vector_and_scores | Unit | Passed | `backend/tests/unit/test_similarity.py` |
+| AC-039 | test_ac039_terms_are_namespaced_and_lowercased | Unit | Passed | `backend/tests/unit/test_similarity.py` |
+| AC-040 | test_ac040_hand_calculated_scores_and_range | Unit | Passed | `backend/tests/unit/test_similarity.py` |
+| AC-041 | test_ac041_empty_fields_are_scored_without_error | Unit | Passed | `backend/tests/unit/test_similarity.py` |
+| NFR-012 | test_nfr012_order_is_deterministic_with_ties_by_id | Unit | Passed | `backend/tests/unit/test_similarity.py` |
+| NFR-012 | test_nfr012_rank_caps_at_ten | Unit | Passed | `backend/tests/unit/test_similarity.py` |
+| AC-039, AC-041 | test_ac039_ac041_every_sample_movie_is_scored_without_error | Integration | Passed | `backend/tests/integration/test_similarity.py` |
+| AC-040, NFR-012 | test_ac040_nfr012_repeated_calls_give_same_order | Integration | Passed | `backend/tests/integration/test_similarity.py` |
+| AC-040, NFR-012 | test_ac040_nfr012_scores_in_range_sorted_and_capped | Integration | Passed | `backend/tests/integration/test_similarity.py` |
+
+### US-013: Like and unlike movies
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-042, AC-043 | [AC-042][AC-043] Like shows liked, pressing again shows not liked | E2E | Passed | `frontend/e2e/likes.spec.ts` |
+| AC-044 | [AC-044] a like survives logout/login and shows in a second browser context | E2E | Passed | `frontend/e2e/likes.spec.ts` |
+| AC-045 | [AC-045] a double click on Like leaves the movie liked once | E2E | Failed | `frontend/e2e/likes.spec.ts` |
+| AC-046, NFR-006 | [AC-046][NFR-006] a second viewer sees not liked and none of the first viewer's likes | E2E | Failed | `frontend/e2e/likes.spec.ts` |
+| NFR-004 | [NFR-004] signed out, the detail page redirects to login and like changes nothing | E2E | Passed | `frontend/e2e/likes.spec.ts` |
+| NFR-013 | [NFR-013] the movie detail screen is English only | E2E | Passed | `frontend/e2e/likes.spec.ts` |
 
 ## Project setup
 

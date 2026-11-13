@@ -3,50 +3,71 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start narrative -->
-### DEV-US-001 · draft · source: dev:US-001
+### DEV-US-003 · draft · source: dev:US-003
 
-Ticket US-001, 'Sign up with email and password', was delivered. It is linked to commit 0ea42268d3e214579a1ee0d63cdddd61382ce310.
+Ticket US-003, 'First admin account from server config', was delivered. It is recorded in commit 444b01d5439c193495c59aaab80ecf75440d8ee3.
 
-- Ticket: US-001 - Sign up with email and password
+- Ticket: US-003, First admin account from server config
 - Status: delivered
-- Commit: 0ea42268d3e214579a1ee0d63cdddd61382ce310
-- Not provided in the input: implementation notes, author, delivery date, review or approval information.
+- Commit: 444b01d5439c193495c59aaab80ecf75440d8ee3
+- No implementation notes, reviewer or approval information were provided.
 
-**Related:** US-001
+**Related:** US-003
 
-### DEV-US-002 · draft · source: dev:US-002
+### DEV-US-004 · draft · source: dev:US-004
 
-Ticket US-002, 'Log in and log out', was delivered. It is linked to commit d38cdef795634c998cb66e3db48d6908f9fc2e95, which is also the commit recorded for US-007.
+Ticket US-004, 'No password reset or email verification', was delivered. It is recorded in commit 8715d35c8d8f1caeb22866a72306522bda8a1475.
 
-- Ticket: US-002 - Log in and log out
+- Ticket: US-004, No password reset or email verification
 - Status: delivered
-- Commit: d38cdef795634c998cb66e3db48d6908f9fc2e95
-- Note: the same commit hash is recorded for ticket US-007 (see DEV-US-007).
-- Not provided in the input: implementation notes, author, delivery date, review or approval information.
+- Commit: 8715d35c8d8f1caeb22866a72306522bda8a1475 (the same commit is recorded for US-008 and US-009)
+- No implementation notes were provided.
 
-**Related:** US-002, DEV-US-007
+**Related:** US-004
 
-### DEV-US-005 · draft · source: dev:US-005
+### DEV-US-008 · draft · source: dev:US-008
 
-Ticket US-005, 'Sample catalog available after install', was skipped and has no commit. As a result, no development work is recorded for this ticket.
+Ticket US-008, 'Search movies by title', was delivered. It is recorded in commit 8715d35c8d8f1caeb22866a72306522bda8a1475.
 
-- Ticket: US-005 - Sample catalog available after install
-- Status: skipped
+- Ticket: US-008, Search movies by title
+- Status: delivered
+- Commit: 8715d35c8d8f1caeb22866a72306522bda8a1475 (the same commit is recorded for US-004 and US-009)
+- No implementation notes were provided.
+
+**Related:** US-008
+
+### DEV-US-009 · draft · source: dev:US-009
+
+Ticket US-009, 'Movie detail page', was delivered. It is recorded in commit 8715d35c8d8f1caeb22866a72306522bda8a1475.
+
+- Ticket: US-009, Movie detail page
+- Status: delivered
+- Commit: 8715d35c8d8f1caeb22866a72306522bda8a1475 (the same commit is recorded for US-004 and US-008)
+- No implementation notes were provided.
+
+**Related:** US-009
+
+### DEV-US-012 · draft · source: dev:US-012
+
+Ticket US-012, 'Similarity computed in-house', failed. No commit was recorded, so this work is not delivered.
+
+- Ticket: US-012, Similarity computed in-house
+- Status: failed
 - Commit: none
-- Reason for skipping: not provided in the input.
-- Open point: the project description calls for a built-in sample of about 50 well-known movies shipped with the app. The input does not say whether this is delivered elsewhere or deferred, so it should be confirmed by a human.
+- The overall development run is reported as completed, but this ticket did not deliver. This appears to conflict with the run-level status, so both are recorded.
+- The input gives no failure reason, so none is stated here.
+- Follow-up is not documented in the input. The ticket remains open until a later delivery is recorded.
 
-**Related:** US-005
+**Related:** US-012
 
-### DEV-US-007 · draft · source: dev:US-007
+### DEV-US-013 · draft · source: dev:US-013
 
-Ticket US-007, 'Single deployable app with embedded database', was delivered. It is linked to commit d38cdef795634c998cb66e3db48d6908f9fc2e95, which is also the commit recorded for US-002.
+Ticket US-013, 'Like and unlike movies', was delivered. It is recorded in commit 6ae667bcd9e85e48b9c0438cf88d5087e11d82d0.
 
-- Ticket: US-007 - Single deployable app with embedded database
+- Ticket: US-013, Like and unlike movies
 - Status: delivered
-- Commit: d38cdef795634c998cb66e3db48d6908f9fc2e95
-- Note: the same commit hash is recorded for ticket US-002 (see DEV-US-002).
-- Not provided in the input: implementation notes, author, delivery date, review or approval information.
+- Commit: 6ae667bcd9e85e48b9c0438cf88d5087e11d82d0
+- No implementation notes were provided.
 
-**Related:** US-007, DEV-US-002
+**Related:** US-013
 <!-- sdlc:auto:end narrative -->
