@@ -14,7 +14,7 @@ from app.bootstrap import seed_movies, seed_users
 from app.config import get_settings
 from app.database import SessionLocal
 from app.migrations.runner import upgrade_to_head
-from app.routers import auth, movies
+from app.routers import admin, auth, movies
 
 
 @asynccontextmanager
@@ -55,6 +55,7 @@ app.add_middleware(
 
 
 app.include_router(auth.router)
+app.include_router(admin.router)
 app.include_router(movies.router)
 
 

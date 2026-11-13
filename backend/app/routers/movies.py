@@ -1,8 +1,5 @@
 """Signed-in movie feature entry points (NFR-004)."""
 
-import math
-import re
-from collections import Counter
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
@@ -10,6 +7,7 @@ from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
+from app import similarity
 from app.database import get_db
 from app.deps import get_current_user
 from app.models import Like, Movie, User
@@ -65,25 +63,13 @@ def movie_detail(movie_id: str, db: Annotated[Session, Depends(get_db)]) -> dict
     return _movie_out(_find_movie(db, movie_id))
 
 
-def _features(m: Movie) -> Counter[str]:
-    feats: Counter[str] = Counter()
-    for g in m.genres:
-        feats["g:" + g.lower()] += 1
-    if m.director:
-        feats["d:" + m.director.lower()] += 1
-    for c in m.cast_members:
-        feats["c:" + c.lower()] += 1
-    for w in re.findall(r"[a-z0-9]+", m.plot.lower()):
-        if len(w) > 3:
-            feats["p:" + w] += 1
-    return feats
-
-
-def _cosine(a: Counter[str], b: Counter[str]) -> float:
-    dot = sum(v * b[k] for k, v in a.items() if k in b)
-    na = math.sqrt(sum(v * v for v in a.values()))
-    nb = math.sqrt(sum(v * v for v in b.values()))
-    return dot / (na * nb) if na and nb else 0.0
+@router.get("/movies/{movie_id}/similar")
+def similar(movie_id: str, db: Annotated[Session, Depends(get_db)]) -> dict[str, Any]:
+    target = _find_movie(db, movie_id)
+    movies = {m.id: m for m in db.scalars(select(Movie))}
+    vectors = similarity.vectorise(movies.values())
+    ranked = similarity.rank(vectors[target.id], vectors, {target.id})
+    return {"items": [{**_movie_out(movies[i]), "score": s} for i, s in ranked]}
 
 
 @router.get("/me/for-you")
@@ -91,22 +77,14 @@ def for_you(
     db: Annotated[Session, Depends(get_db)],
     user: Annotated[User, Depends(get_current_user)],
 ) -> dict[str, Any]:
-    liked = db.scalars(
-        select(Movie).join(Like, Like.movie_id == Movie.id).where(Like.user_id == user.id)
-    ).all()
-    if not liked:
+    liked_ids = set(db.scalars(select(Like.movie_id).where(Like.user_id == user.id)))
+    if not liked_ids:
         return {"items": [], "has_likes": False}
-    profile: Counter[str] = Counter()
-    for m in liked:
-        profile.update(_features(m))
-    liked_ids = {m.id for m in liked}
-    scored = []
-    for m in db.scalars(select(Movie).where(Movie.id.not_in(liked_ids))):
-        score = round(_cosine(profile, _features(m)), 6)
-        if score > 0:
-            scored.append((score, m))
-    scored.sort(key=lambda t: (-t[0], t[1].id))
-    items = [{**_movie_out(m), "score": s} for s, m in scored[:10]]
+    movies = {m.id: m for m in db.scalars(select(Movie))}
+    vectors = similarity.vectorise(movies.values())
+    profile = similarity.add_vectors(vectors[i] for i in liked_ids if i in vectors)
+    ranked = similarity.rank(profile, vectors, liked_ids)
+    items = [{**_movie_out(movies[i]), "score": s} for i, s in ranked]
     return {"items": items, "has_likes": True}
 
 
