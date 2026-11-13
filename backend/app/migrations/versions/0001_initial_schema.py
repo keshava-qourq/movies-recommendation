@@ -13,11 +13,16 @@ down_revision = None
 branch_labels = None
 depends_on = None
 
+BigInt = sa.BigInteger().with_variant(sa.Integer(), "sqlite")
+
 
 def upgrade() -> None:
+    pg = op.get_bind().dialect.name == "postgresql"
+    empty_list = sa.text("'{}'") if pg else sa.text("'[]'")
+    text_list = postgresql.ARRAY(sa.Text()).with_variant(sa.JSON(), "sqlite")
     op.create_table(
         "users",
-        sa.Column("id", sa.BigInteger(), sa.Identity(always=True), primary_key=True),
+        sa.Column("id", BigInt, sa.Identity(always=True), primary_key=True),
         sa.Column("email", sa.String(320), nullable=False),
         sa.Column("password_hash", sa.Text(), nullable=False),
         sa.Column("role", sa.String(10), nullable=False),
@@ -29,11 +34,11 @@ def upgrade() -> None:
     )
     op.create_table(
         "sessions",
-        sa.Column("id", sa.BigInteger(), sa.Identity(always=True), primary_key=True),
+        sa.Column("id", BigInt, sa.Identity(always=True), primary_key=True),
         sa.Column("token_hash", sa.String(64), nullable=False),
         sa.Column(
             "user_id",
-            sa.BigInteger(),
+            BigInt,
             sa.ForeignKey("users.id", ondelete="CASCADE"),
             nullable=False,
         ),
@@ -52,18 +57,16 @@ def upgrade() -> None:
     op.create_index("ix_sessions_user_id", "sessions", ["user_id"])
     op.create_table(
         "movies",
-        sa.Column("id", sa.BigInteger(), sa.Identity(always=True), primary_key=True),
+        sa.Column("id", BigInt, sa.Identity(always=True), primary_key=True),
         sa.Column("title", sa.String(300), nullable=False),
         sa.Column("title_key", sa.String(300), nullable=False),
         sa.Column("year", sa.SmallInteger(), nullable=False),
-        sa.Column(
-            "genres", postgresql.ARRAY(sa.Text()), server_default=sa.text("'{}'"), nullable=False
-        ),
+        sa.Column("genres", text_list, server_default=empty_list, nullable=False),
         sa.Column("director", sa.String(200), server_default="", nullable=False),
         sa.Column(
             "cast_members",
-            postgresql.ARRAY(sa.Text()),
-            server_default=sa.text("'{}'"),
+            text_list,
+            server_default=empty_list,
             nullable=False,
         ),
         sa.Column("plot", sa.Text(), server_default="", nullable=False),
@@ -76,13 +79,13 @@ def upgrade() -> None:
         "likes",
         sa.Column(
             "user_id",
-            sa.BigInteger(),
+            BigInt,
             sa.ForeignKey("users.id", ondelete="CASCADE"),
             primary_key=True,
         ),
         sa.Column(
             "movie_id",
-            sa.BigInteger(),
+            BigInt,
             sa.ForeignKey("movies.id", ondelete="CASCADE"),
             primary_key=True,
         ),

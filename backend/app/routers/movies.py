@@ -2,13 +2,14 @@
 
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.deps import get_current_user
-from app.models import Movie
+from app.models import Like, Movie, User
+from app.security import utcnow
 
 router = APIRouter(dependencies=[Depends(get_current_user)])
 
@@ -61,6 +62,53 @@ def for_you() -> dict[str, Any]:
     return {"items": []}
 
 
+def _find_movie(db: Session, movie_id: str) -> Movie:
+    try:
+        mid = int(movie_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Movie not found") from None
+    m = db.get(Movie, mid) if -(2**63) <= mid < 2**63 else None
+    if m is None:
+        raise HTTPException(status_code=404, detail="Movie not found")
+    return m
+
+
+@router.post("/movies/{movie_id}/like")
+def like_movie(
+    movie_id: str,
+    db: Annotated[Session, Depends(get_db)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> dict[str, Any]:
+    m = _find_movie(db, movie_id)
+    if db.get(Like, (user.id, m.id)) is None:
+        db.add(Like(user_id=user.id, movie_id=m.id, created_at=utcnow()))
+        db.commit()
+    return _movie_out(m)
+
+
+@router.delete("/movies/{movie_id}/like", status_code=204)
+def unlike_movie(
+    movie_id: str,
+    db: Annotated[Session, Depends(get_db)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> Response:
+    m = _find_movie(db, movie_id)
+    existing = db.get(Like, (user.id, m.id))
+    if existing is not None:
+        db.delete(existing)
+        db.commit()
+    return Response(status_code=204)
+
+
 @router.get("/me/likes")
-def likes() -> dict[str, Any]:
-    return {"items": []}
+def likes(
+    db: Annotated[Session, Depends(get_db)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> dict[str, Any]:
+    rows = db.scalars(
+        select(Movie)
+        .join(Like, Like.movie_id == Movie.id)
+        .where(Like.user_id == user.id)
+        .order_by(Like.created_at.desc(), Movie.id.desc())
+    ).all()
+    return {"items": [_movie_out(m) for m in rows]}

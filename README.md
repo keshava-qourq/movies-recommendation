@@ -45,3 +45,36 @@ pytest
 ruff check .
 ruff format .
 ```
+
+## Setup
+
+Install: run `npm install` in `frontend/` and `pip install -r requirements.txt` in `backend/`.
+Start: run the backend with `uvicorn app.main:app` and the frontend with `npm run dev`.
+The database is PostgreSQL, read from `DATABASE_URL`. No other service is needed.
+On first start the built-in sample of about 50 movies is loaded once.
+
+## First admin
+
+Set `BOOTSTRAP_ADMIN_EMAIL` and `BOOTSTRAP_ADMIN_PASSWORD` on the server. On startup
+the first admin account is created if no user with that email exists. Optionally set
+`SMOKE_TEST_EMAIL` and `SMOKE_TEST_PASSWORD` to seed one viewer.
+
+## Session settings
+
+Sign-in returns an opaque session token, sent as `Authorization: Bearer <token>`.
+A session expires after 30 minutes without any authenticated request. Each login
+creates a new session, and logout revokes only the token used.
+
+## CSV upload format
+
+Admins upload movies as a UTF-8 CSV file with a header row, one movie per row, and
+the same columns as the bundled sample catalog (title, year, plot, genres, director,
+cast). A movie is unique by lowercased title plus year. Rows are counted from 1
+after the header, and errors name the row.
+
+## Known limits
+
+- Sized for about 5,000 movies and hundreds of users, on a single instance.
+- One API worker, so the in-memory similarity index stays consistent.
+- No email sending, password reset or third-party login.
+- Movie listing limit is at most 100 per page.

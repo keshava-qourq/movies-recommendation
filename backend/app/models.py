@@ -3,9 +3,10 @@
 Any change here needs a matching Alembic migration in `app/migrations/versions`.
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 
 from sqlalchemy import (
+    JSON,
     CheckConstraint,
     DateTime,
     ForeignKey,
@@ -20,8 +21,25 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.types import TypeDecorator
 
 from app.database import Base
+
+
+class UTCDateTime(TypeDecorator):
+    """timestamptz that comes back timezone-aware on SQLite too (which drops the zone)."""
+
+    impl = DateTime(timezone=True)
+    cache_ok = True
+
+    def process_result_value(self, value, dialect):
+        if value is not None and value.tzinfo is None:
+            return value.replace(tzinfo=UTC)
+        return value
+
+
+# PostgreSQL arrays; a JSON list on SQLite.
+TextList = ARRAY(Text).with_variant(JSON(), "sqlite")
 
 
 class User(Base):
@@ -33,7 +51,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(320), unique=True)
     password_hash: Mapped[str] = mapped_column(Text)
     role: Mapped[str] = mapped_column(String(10))
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), server_default=func.now())
 
 
 class UserSession(Base):
@@ -45,11 +63,9 @@ class UserSession(Base):
     id: Mapped[int] = mapped_column(Identity(always=True), primary_key=True)
     token_hash: Mapped[str] = mapped_column(String(64), unique=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    last_seen_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
-    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), server_default=func.now())
+    last_seen_at: Mapped[datetime] = mapped_column(UTCDateTime(), server_default=func.now())
+    revoked_at: Mapped[datetime | None] = mapped_column(UTCDateTime(), nullable=True)
 
 
 class Movie(Base):
@@ -61,11 +77,11 @@ class Movie(Base):
     # Lowercased, trimmed title; unique together with year.
     title_key: Mapped[str] = mapped_column(String(300))
     year: Mapped[int] = mapped_column(SmallInteger)
-    genres: Mapped[list[str]] = mapped_column(ARRAY(Text), server_default=text("'{}'"))
+    genres: Mapped[list[str]] = mapped_column(TextList, server_default=text("'{}'"))
     director: Mapped[str] = mapped_column(String(200), server_default="")
-    cast_members: Mapped[list[str]] = mapped_column(ARRAY(Text), server_default=text("'{}'"))
+    cast_members: Mapped[list[str]] = mapped_column(TextList, server_default=text("'{}'"))
     plot: Mapped[str] = mapped_column(Text, server_default="")
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), server_default=func.now())
 
 
 class Like(Base):
@@ -77,4 +93,4 @@ class Like(Base):
     movie_id: Mapped[int] = mapped_column(
         ForeignKey("movies.id", ondelete="CASCADE"), primary_key=True
     )
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), server_default=func.now())
