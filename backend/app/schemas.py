@@ -1,8 +1,4 @@
-"""Pydantic request and response models.
-
-One pair per entity in the approved data model, plus the placeholder every
-generated route returns until it has been implemented.
-"""
+"""Pydantic request and response models for the auth endpoints."""
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
