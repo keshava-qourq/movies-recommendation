@@ -1,5 +1,4 @@
 // @ts-nocheck -- generated from the approved design under its JS runtime contract; not hand-written TypeScript.
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
 
 import * as UI from "@/lib/ui";
@@ -10,8 +9,6 @@ import { apiFetch, getSessionToken } from "@/lib/api";
 import { getUser } from "@/lib/auth";
 
 const PAGE = 100;
-
-const { Search, Check } = Icons;
 
 const WF_IDS = { Heat: "i-2-0-0", "Heat Wave": "i-2-0-1", "Fever Pitch": "i-2-0-2" };
 
@@ -151,7 +148,6 @@ export default function Screen() {
     };
   }, [load]);
 
-  const results = items;
   const q = activeQ.trim();
   const showEmpty = loaded && !error && !loading && total === 0;
 
@@ -316,7 +312,7 @@ export default function Screen() {
           </p>
         </div>
 
-        {results.length > 0 && (
+        {items.length > 0 && (
           <ul
             style={{
               listStyle: "none",
@@ -327,7 +323,7 @@ export default function Screen() {
               gap: 16,
             }}
           >
-            {results.map((m, idx) => (
+            {items.map((m, idx) => (
               <li key={m.id} style={{ margin: 0 }}>
                 <button
                   type="button"
