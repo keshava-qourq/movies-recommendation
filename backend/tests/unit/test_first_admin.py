@@ -3,7 +3,7 @@
 import logging
 import secrets
 
-from fastapi import Depends
+from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -71,35 +71,35 @@ def test_ac013_unset_or_half_set_warns_and_seeds_nothing(db_session: Session, ca
 def test_ac014_require_admin_401_403_and_signup_never_admin(client: TestClient) -> None:
     calls: list[int] = []
 
-    @app.get("/_test-admin-only")
+    # A separate app, so nothing is added to (or left on) the real one.
+    probe_app = FastAPI()
+    probe_app.dependency_overrides.update(app.dependency_overrides)
+
+    @probe_app.get("/_test-admin-only")
     def _probe(_: User = Depends(require_admin)) -> dict:  # noqa: B008
         calls.append(1)
         return {}
 
-    try:
-        assert client.get("/_test-admin-only").json() == {"detail": "Not authenticated"}
-        bad = client.get("/_test-admin-only", headers={"Authorization": "Bearer nope"})
-        assert bad.status_code == 401
-        res = client.post(
-            "/auth/signup",
-            json={
-                "email": f"v-{secrets.token_hex(4)}@example.com",
-                "password": secrets.token_urlsafe(),
-                "role": "admin",
-                "is_admin": True,
-            },
-        )
-        assert res.status_code == 201 and res.json()["user"]["role"] == "viewer"
-        denied = client.get(
-            "/_test-admin-only", headers={"Authorization": f"Bearer {res.json()['token']}"}
-        )
-        assert denied.status_code == 403
-        assert denied.json() == {"detail": "Admin access required"}
-        assert calls == []
-    finally:
-        app.router.routes[:] = [
-            r for r in app.router.routes if getattr(r, "path", "") != "/_test-admin-only"
-        ]
+    probe = TestClient(probe_app)
+    assert probe.get("/_test-admin-only").json() == {"detail": "Not authenticated"}
+    bad = probe.get("/_test-admin-only", headers={"Authorization": "Bearer nope"})
+    assert bad.status_code == 401
+    res = client.post(
+        "/auth/signup",
+        json={
+            "email": f"v-{secrets.token_hex(4)}@example.com",
+            "password": secrets.token_urlsafe(),
+            "role": "admin",
+            "is_admin": True,
+        },
+    )
+    assert res.status_code == 201 and res.json()["user"]["role"] == "viewer"
+    denied = probe.get(
+        "/_test-admin-only", headers={"Authorization": f"Bearer {res.json()['token']}"}
+    )
+    assert denied.status_code == 403
+    assert denied.json() == {"detail": "Admin access required"}
+    assert calls == []
 
 
 def test_smoke_viewer_seeded_once_and_not_when_unset(db_session: Session) -> None:

@@ -1,8 +1,7 @@
 """Startup seeding of the first admin and the smoke-test viewer.
 
 Both are idempotent (created only when no user with that email exists) and seed nothing
-unless both settings of a pair are set. The bundled sample catalog is loaded by a later
-ticket, which adds its step to `run_startup`.
+unless both settings of a pair are set. `seed_movies` also loads the bundled sample catalog.
 """
 
 import json
