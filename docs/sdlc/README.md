@@ -21,7 +21,7 @@ no movie APIs, no poster images from the web, no email sending, no
 third-party login, and no AI or LLM calls. Ship a built-in sample of about
 50 well-known movies with the app, so it works right after install.
 
-**Documentation version:** v13
+**Documentation version:** v14
 <!-- sdlc:auto:end overview -->
 
 ## Contents
@@ -32,7 +32,7 @@ third-party login, and no AI or LLM calls. Ship a built-in sample of about
 | [Requirements](requirements/README.md) | v1 approved |
 | [Architecture](architecture/README.md) | 23 entries |
 | [Planning](planning/README.md) | 7 entries |
-| [Development](development/README.md) | 6 entries |
+| [Development](development/README.md) | 5 entries |
 | [Testing](testing/README.md) | 3 entries |
 | [Deployment](deployment/README.md) | 1 entry |
 | [Maintenance](maintenance/README.md) | 0 entries |
@@ -43,10 +43,10 @@ third-party login, and no AI or LLM calls. Ship a built-in sample of about
 | [Developer guide](development/developer-guide.md) | generated |
 | [API reference](development/api-reference.md) | 14 routes |
 | [Test report](testing/test-report.md) | not run yet |
-| [Tests](testing/test-cases.md) | 145 tests |
+| [Tests](testing/test-cases.md) | 185 tests |
 | [Deployment guide](deployment/deployment-guide.md) | deployed |
 | [Runbook](deployment/runbook.md) | deployed |
 | [Release notes](deployment/release-notes.md) | 5 releases |
 | [Traceability matrix](traceability-matrix.md) | 18 requirements |
-| [Changelog](CHANGELOG.md) | 13 versions |
+| [Changelog](CHANGELOG.md) | 14 versions |
 <!-- sdlc:auto:end contents -->

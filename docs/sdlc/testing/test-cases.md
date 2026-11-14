@@ -3,9 +3,9 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-145 tests · Passed 145 · Failed 0 · Skipped 0 · Not run 0
+185 tests · Passed 185 · Failed 0 · Skipped 0 · Not run 0
 
-Acceptance criteria covered: 36/64 · passing: 36/64
+Acceptance criteria covered: 56/64 · passing: 56/64
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
@@ -202,6 +202,63 @@ Acceptance criteria covered: 36/64 · passing: 36/64
 | NFR-004 | [NFR-004] like, unlike and my likes without a token return 401 and change nothing | E2E | Passed | `frontend/e2e/likes.spec.ts` |
 | NFR-004 | [NFR-004] signed out, the detail page redirects to login and like changes nothing | E2E | Passed | `frontend/e2e/likes.spec.ts` |
 | NFR-013 | [NFR-013] the movie detail screen is English only | E2E | Passed | `frontend/e2e/likes.spec.ts` |
+
+## Sprint 3
+
+### US-011: See similar movies ranked by similarity
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-034, AC-035, AC-037, NFR-012 | test_ac034_ac035_ac037_nfr012_ranked_output_is_bounded_sorted_and_stable | Unit | Passed | `backend/tests/unit/test_similarity_scale.py` |
+| AC-038 | test_ac038_catalog_cache_rebuilds_only_when_fingerprint_changes | Unit | Passed | `backend/tests/unit/test_similarity_scale.py` |
+| AC-038, NFR-007, NFR-008 | test_ac038_nfr007_nfr008_5000_movies_vectorise_and_rank_fast | Unit | Passed | `backend/tests/unit/test_similarity_scale.py` |
+| NFR-012 | test_nfr012_scores_stay_in_range_with_empty_fields | Unit | Passed | `backend/tests/unit/test_similarity_scale.py` |
+| AC-034, AC-035 | [AC-034][AC-035] at most 10 similar entries, scores non-increasing, own title absent | E2E | Passed | `frontend/e2e/similar-movies.spec.ts` |
+| AC-036 | [AC-036] a movie sharing director, genres and cast ranks above one sharing nothing | E2E | Passed | `frontend/e2e/similar-movies.spec.ts` |
+| AC-037 | [AC-037] reloading twice gives the identical order | E2E | Passed | `frontend/e2e/similar-movies.spec.ts` |
+| AC-038, NFR-007 | [AC-038][NFR-007] the similar section is visible within 2 seconds of page load | E2E | Passed | `frontend/e2e/similar-movies.spec.ts` |
+| NFR-013 | [NFR-013] the similar section text is English only | E2E | Passed | `frontend/e2e/similar-movies.spec.ts` |
+
+### US-014: For you list from all likes
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-047 | ForYou > [AC-047] shows an error when loading fails | Unit | Passed | `frontend/src/screens/ForYou.test.tsx` |
+| AC-047 | ForYou > [AC-047] shows the ranked list in server order and opens a movie | Unit | Passed | `frontend/src/screens/ForYou.test.tsx` |
+| AC-049 | ForYou > [AC-049] has_likes with no items shows the liked-everything state | Unit | Passed | `frontend/src/screens/ForYou.test.tsx` |
+| AC-050 | ForYou > [AC-050] a failed like shows an error and keeps the list | Unit | Passed | `frontend/src/screens/ForYou.test.tsx` |
+| AC-050 | ForYou > [AC-050] like and unlike call the API then reload | Unit | Passed | `frontend/src/screens/ForYou.test.tsx` |
+| AC-051 | ForYou > [AC-051] no likes shows the prompt and no list, and Search movies goes to /search | Unit | Passed | `frontend/src/screens/ForYou.test.tsx` |
+| AC-047, AC-049 | [AC-047][AC-049] recommendations are highest match first, capped at 10, and exclude liked titles | E2E | Passed | `frontend/e2e/for-you.spec.ts` |
+| AC-048 | [AC-048] after liking two movies there are recommendations related to each | E2E | Passed | `frontend/e2e/for-you.spec.ts` |
+| AC-050 | [AC-050] unliking a movie, or liking another, changes the list on the next visit | E2E | Passed | `frontend/e2e/for-you.spec.ts` |
+| AC-051 | [AC-051] a new viewer sees the like prompt, a Search movies control and no recommendations | E2E | Passed | `frontend/e2e/for-you.spec.ts` |
+| AC-051, AC-052 | [AC-051][AC-052] liking a first movie removes the prompt and shows a recommendations list | E2E | Passed | `frontend/e2e/for-you.spec.ts` |
+| NFR-004 | [NFR-004] signed out, /for-you redirects to login and GET /me/for-you returns 401 | E2E | Passed | `frontend/e2e/for-you.spec.ts` |
+| NFR-006 | [NFR-006] a second viewer with no likes sees the prompt, not the first viewer's recommendations | E2E | Passed | `frontend/e2e/for-you.spec.ts` |
+| NFR-013 | [NFR-013] the For you screen is English only | E2E | Passed | `frontend/e2e/for-you.spec.ts` |
+
+### US-016: Upload movies from a CSV file
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-053, AC-058, AC-059, AC-060 | test_ac053_ac058_ac059_ac060_mixed_rows | Unit | Passed | `backend/tests/unit/test_admin_upload.py` |
+| AC-056 | test_ac056_bad_header_and_non_utf8_add_nothing | Unit | Passed | `backend/tests/unit/test_admin_upload.py` |
+| AC-061 | test_ac061_no_edit_or_delete_routes | Unit | Passed | `backend/tests/unit/test_admin_upload.py` |
+| AC-053, AC-054, AC-058 | AdminUpload > [AC-053] [AC-054] [AC-058] sends the file and shows counts and rows | Unit | Passed | `frontend/src/screens/AdminUpload.test.tsx` |
+| AC-054 | AdminUpload > [AC-054] shows an empty state before any upload | Unit | Passed | `frontend/src/screens/AdminUpload.test.tsx` |
+| AC-056 | AdminUpload > [AC-056] refuses a non-.csv file before any request | Unit | Passed | `frontend/src/screens/AdminUpload.test.tsx` |
+| AC-056 | AdminUpload > [AC-056] shows the server detail on a 400 | Unit | Passed | `frontend/src/screens/AdminUpload.test.tsx` |
+| AC-053, AC-054, AC-055, NFR-015 | [AC-053][AC-054][AC-055][NFR-015] valid upload adds rows, shows counts, splits genres and cast, shows Similar movies | E2E | Passed | `frontend/e2e/admin-upload.spec.ts` |
+| AC-056, NFR-015 | [AC-056][NFR-015] a .txt file is refused, says nothing was added, and its title is not searchable | E2E | Passed | `frontend/e2e/admin-upload.spec.ts` |
+| AC-056, NFR-015 | [AC-056][NFR-015] a CSV missing a required column shows an error and adds nothing | E2E | Passed | `frontend/e2e/admin-upload.spec.ts` |
+| AC-057, NFR-005 | [AC-057][NFR-005] a viewer gets 403 and an anonymous caller 401 on upload, and the catalog is unchanged | E2E | Passed | `frontend/e2e/admin-upload.spec.ts` |
+| AC-057, NFR-005 | [AC-057][NFR-005] a viewer is redirected from /admin-upload and sees no upload control | E2E | Passed | `frontend/e2e/admin-upload.spec.ts` |
+| AC-058, NFR-015 | [AC-058][NFR-015] rejected rows list row number and reason, and valid rows are added | E2E | Passed | `frontend/e2e/admin-upload.spec.ts` |
+| AC-059 | [AC-059] re-uploading the same title and year in another letter case is skipped | E2E | Passed | `frontend/e2e/admin-upload.spec.ts` |
+| AC-060 | [AC-060] the same title and year twice in one file adds the first and skips the second | E2E | Passed | `frontend/e2e/admin-upload.spec.ts` |
+| AC-061 | [AC-061] no edit or delete control on upload page or detail page, and PUT/PATCH/DELETE on /movies/{id} are refused | E2E | Passed | `frontend/e2e/admin-upload.spec.ts` |
+| NFR-013, NFR-015 | [NFR-013][NFR-015] the upload page and its result are English only | E2E | Passed | `frontend/e2e/admin-upload.spec.ts` |
 
 ## Project setup
 
