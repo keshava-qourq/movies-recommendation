@@ -76,6 +76,12 @@ def upload_movies(
                 problems.append("Plot is empty")
             if len(director) > 200:
                 problems.append("Director is longer than 200 characters")
+            genres = _split(row.get("genres") or "")
+            cast = _split(row.get("cast") or "")
+            if any(len(g) > 100 for g in genres):
+                problems.append("A genre is longer than 100 characters")
+            if any(len(c) > 200 for c in cast):
+                problems.append("A cast name is longer than 200 characters")
             if problems:
                 rejected.append({"row": row_no, "title": title, "reason": "; ".join(problems)})
                 continue
@@ -98,9 +104,9 @@ def upload_movies(
                     title=title,
                     title_key=key[0],
                     year=year,
-                    genres=_split(row.get("genres") or ""),
+                    genres=genres,
                     director=director,
-                    cast_members=_split(row.get("cast") or ""),
+                    cast_members=cast,
                     plot=plot,
                 )
             )

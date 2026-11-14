@@ -52,9 +52,10 @@ def me(user: Annotated[User, Depends(get_current_user)]) -> UserOut:
 def signup(body: SignupRequest, db: DB) -> AuthResponse:
     email = normalize_email(body.email)
     conflict = HTTPException(status_code=409, detail="Email already registered")
+    password_hash = hash_password(body.password)  # hash first: same timing either way
     if db.scalar(select(User.id).where(User.email == email)) is not None:
         raise conflict
-    user = User(email=email, password_hash=hash_password(body.password), role="viewer")
+    user = User(email=email, password_hash=password_hash, role="viewer")
     db.add(user)
     try:
         db.flush()
