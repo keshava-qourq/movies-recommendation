@@ -134,16 +134,18 @@ async function allFlows(page: Page): Promise<string[]> {
   await expect(page.getByRole("button", { name: /Open details$/ }).first()).toBeVisible();
   const like = page.locator("button[aria-pressed]");
   await settle(page);
-  const start = await like.getAttribute("aria-pressed");
-  const other = start === "true" ? "false" : "true";
+  if ((await like.getAttribute("aria-pressed")) === "true") {
+    await like.click();
+    await expect(like).toHaveAttribute("aria-pressed", "false");
+  }
   await like.click();
-  await expect(like).toHaveAttribute("aria-pressed", other);
+  await expect(like).toHaveAttribute("aria-pressed", "true");
   await settle(page);
   refs.push(...(await domRefs(page)));
   await like.click();
-  await expect(like).toHaveAttribute("aria-pressed", start ?? "false");
+  await expect(like).toHaveAttribute("aria-pressed", "false");
   await like.click();
-  await expect(like).toHaveAttribute("aria-pressed", other);
+  await expect(like).toHaveAttribute("aria-pressed", "true");
 
   await page.goto("/for-you");
   await expect(page.locator("section[aria-labelledby=rec-h] ol li").first()).toBeVisible();
@@ -183,14 +185,16 @@ test("[AC-022][NFR-009] search, similar, like and unlike, For you and upload con
   await expect(page.getByRole("heading", { name: "Similar movies" })).toBeVisible();
   const like = page.locator("button[aria-pressed]");
   await settle(page);
-  const start = await like.getAttribute("aria-pressed");
-  const other = start === "true" ? "false" : "true";
+  if ((await like.getAttribute("aria-pressed")) === "true") {
+    await like.click();
+    await expect(like).toHaveAttribute("aria-pressed", "false");
+  }
   await like.click();
-  await expect(like).toHaveAttribute("aria-pressed", other);
+  await expect(like).toHaveAttribute("aria-pressed", "true");
   await like.click();
-  await expect(like).toHaveAttribute("aria-pressed", start ?? "false");
+  await expect(like).toHaveAttribute("aria-pressed", "false");
   await like.click();
-  await expect(like).toHaveAttribute("aria-pressed", other);
+  await expect(like).toHaveAttribute("aria-pressed", "true");
   await page.goto("/for-you");
   await expect(page.locator("section[aria-labelledby=rec-h] ol li").first()).toBeVisible();
   await upload(page);
