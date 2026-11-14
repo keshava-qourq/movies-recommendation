@@ -152,19 +152,27 @@ test("[AC-033][NFR-014] Heat artwork is identical on Search, detail, similar and
   const simLabel = (await first.getAttribute("aria-label")) ?? "";
   const simTitle = simLabel.replace(/ \(\d{4}\), rank.*$/, "");
   const simKey = await keyOf(first);
-  const simHtml = await first.locator(ART).first().evaluate((e) => e.outerHTML);
+  const simHtml = await first
+    .locator(ART)
+    .first()
+    .evaluate((e) => e.outerHTML);
   await search(page, simTitle);
   const simOnSearch = await html(page, simKey);
   expect(simOnSearch).toBe(simHtml);
 
   // For you card of another page
   await request.put(`${API}/movies/${id}/like`, { headers: { Authorization: `Bearer ${token}` } });
-  const fy = await request.get(`${API}/me/for-you`, { headers: { Authorization: `Bearer ${token}` } });
+  const fy = await request.get(`${API}/me/for-you`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
   const rec = (await fy.json()).items[0] as { title: string };
   await page.goto("/for-you");
   const card = page.locator("section[aria-labelledby=rec-h] ol li").first();
   const recKey = await keyOf(card);
-  const recHtml = await card.locator(ART).first().evaluate((e) => e.outerHTML);
+  const recHtml = await card
+    .locator(ART)
+    .first()
+    .evaluate((e) => e.outerHTML);
   await search(page, rec.title);
   expect(await html(page, recKey)).toBe(recHtml);
 
@@ -192,9 +200,11 @@ test("[AC-033][NFR-014] different movies have different artwork keys and markup"
   await signedInViewer(page);
   await search(page, "a");
   await expect(tiles(page).first()).toBeVisible();
-  const items = await page.locator(ART).evaluateAll((els) =>
-    els.map((e) => ({ key: e.getAttribute("data-artwork-key") ?? "", html: e.outerHTML })),
-  );
+  const items = await page
+    .locator(ART)
+    .evaluateAll((els) =>
+      els.map((e) => ({ key: e.getAttribute("data-artwork-key") ?? "", html: e.outerHTML })),
+    );
   expect(items.length).toBeGreaterThan(1);
   const keys = items.map((i) => i.key);
   expect(keys.every((k) => k.length > 0)).toBe(true);
