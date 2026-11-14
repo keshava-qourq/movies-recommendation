@@ -3,9 +3,9 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-185 tests · Passed 185 · Failed 0 · Skipped 0 · Not run 0
+208 tests · Passed 198 · Failed 0 · Skipped 0 · Not run 10
 
-Acceptance criteria covered: 56/64 · passing: 56/64
+Acceptance criteria covered: 63/64 · passing: 59/64
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
@@ -259,6 +259,46 @@ Acceptance criteria covered: 56/64 · passing: 56/64
 | AC-060 | [AC-060] the same title and year twice in one file adds the first and skips the second | E2E | Passed | `frontend/e2e/admin-upload.spec.ts` |
 | AC-061 | [AC-061] no edit or delete control on upload page or detail page, and PUT/PATCH/DELETE on /movies/{id} are refused | E2E | Passed | `frontend/e2e/admin-upload.spec.ts` |
 | NFR-013, NFR-015 | [NFR-013][NFR-015] the upload page and its result are English only | E2E | Passed | `frontend/e2e/admin-upload.spec.ts` |
+
+## Sprint 4
+
+### US-006: No outside dependencies at build or run time
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-021 | self-contained build > [AC-021] no src, href, url() or @import points at a web address | Unit | Passed | `frontend/src/self-contained.test.ts` |
+| AC-021 | self-contained build > [AC-021] no web font is loaded from a web address | Unit | Passed | `frontend/src/self-contained.test.ts` |
+| AC-021 | self-contained build > [AC-021] other http(s) URLs are only SVG xmlns declarations | Unit | Passed | `frontend/src/self-contained.test.ts` |
+| AC-021 | self-contained build > [AC-021] scans index.html and the source files | Unit | Passed | `frontend/src/self-contained.test.ts` |
+| AC-021, NFR-009 | [AC-021][NFR-009] every request on every page goes to the SPA or API origin and no font comes from elsewhere | E2E | Not run yet | `frontend/e2e/self-contained.spec.ts` |
+| AC-021, NFR-009 | [AC-021][NFR-009] no stylesheet, script, link or image references a third-party host | E2E | Not run yet | `frontend/e2e/self-contained.spec.ts` |
+| AC-022, NFR-009 | [AC-022][NFR-009] search, similar, like and unlike, For you and upload contact only the SPA and API hosts | E2E | Not run yet | `frontend/e2e/self-contained.spec.ts` |
+| NFR-009, AC-021, AC-022 | [NFR-009][AC-021][AC-022] with all other hosts aborted every flow still works and nothing was blocked | E2E | Not run yet | `frontend/e2e/self-contained.spec.ts` |
+| NFR-013 | [NFR-013] the pages visited in the self-contained flows are English only | E2E | Not run yet | `frontend/e2e/self-contained.spec.ts` |
+
+### US-010: Generated placeholder artwork
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-032 | Artwork > [AC-032] has no image element and no http(s) URL | Unit | Passed | `frontend/src/lib/Artwork.test.tsx` |
+| AC-033 | Artwork > [AC-033] casing and whitespace do not change the output | Unit | Passed | `frontend/src/lib/Artwork.test.tsx` |
+| AC-033 | Artwork > [AC-033] different titles differ | Unit | Passed | `frontend/src/lib/Artwork.test.tsx` |
+| AC-033 | Artwork > [AC-033] same input renders identical markup twice | Unit | Passed | `frontend/src/lib/Artwork.test.tsx` |
+| AC-033 | Artwork > [AC-033] same title in a different year differs | Unit | Passed | `frontend/src/lib/Artwork.test.tsx` |
+| AC-032 | [AC-032] every Search tile, the detail main and similar movies, and For you cards have artwork | E2E | Not run yet | `frontend/e2e/artwork.spec.ts` |
+| AC-032, NFR-009 | [AC-032][NFR-009] artwork uses no <img> and no image is requested from another origin | E2E | Not run yet | `frontend/e2e/artwork.spec.ts` |
+| AC-033, NFR-014 | [AC-033][NFR-014] Heat artwork is identical on Search, detail, similar and For you, after reload and in a second context | E2E | Not run yet | `frontend/e2e/artwork.spec.ts` |
+| AC-033, NFR-014 | [AC-033][NFR-014] different movies have different artwork keys and markup | E2E | Not run yet | `frontend/e2e/artwork.spec.ts` |
+| NFR-013 | [NFR-013] artwork pages are English only | E2E | Not run yet | `frontend/e2e/artwork.spec.ts` |
+
+### US-018: Setup and usage guide
+
+| Criteria | Test | Level | Result | File |
+|---|---|---|---|---|
+| AC-062, NFR-011 | test_ac062_nfr011_explains_install_start_and_settings | Integration | Passed | `backend/tests/integration/test_setup_guide.py` |
+| AC-063, NFR-011 | test_ac063_nfr011_csv_format_columns_separator_and_example | Integration | Passed | `backend/tests/integration/test_setup_guide.py` |
+| AC-064, NFR-011 | test_ac064_nfr011_limits_reset_verification_services_scale | Integration | Passed | `backend/tests/integration/test_setup_guide.py` |
+| NFR-013 | test_nfr013_documentation_is_english_only | Integration | Passed | `backend/tests/integration/test_setup_guide.py` |
 
 ## Project setup
 
