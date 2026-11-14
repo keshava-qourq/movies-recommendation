@@ -40,21 +40,21 @@ export default defineConfig({
   webServer: runAgainstDeployment
     ? undefined
     : [
-      {
-        // The backend runs against the PostgreSQL that DATABASE_URL names (migrations
-        // run on startup). Its packages are in backend/.venv (installed before the run).
-        command:
-          "cd ../backend && .venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000",
-        url: "http://127.0.0.1:8000/health",
-        reuseExistingServer: !process.env.CI,
-        timeout: 180_000,
-      },
-      {
-        command: "npm run build && npm run preview -- --port 4173 --host 127.0.0.1",
-        url: "http://127.0.0.1:4173",
-        reuseExistingServer: !process.env.CI,
-        // A cold production build in a sandbox can take minutes.
-        timeout: 300_000,
-      },
-    ],
+        {
+          // The backend runs against the PostgreSQL that DATABASE_URL names (migrations
+          // run on startup). Its packages are in backend/.venv (installed before the run).
+          command:
+            "cd ../backend && .venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000",
+          url: "http://127.0.0.1:8000/health",
+          reuseExistingServer: !process.env.CI,
+          timeout: 180_000,
+        },
+        {
+          command: "npm run build && npm run preview -- --port 4173 --host 127.0.0.1",
+          url: "http://127.0.0.1:4173",
+          reuseExistingServer: !process.env.CI,
+          // A cold production build in a sandbox can take minutes.
+          timeout: 300_000,
+        },
+      ],
 });
