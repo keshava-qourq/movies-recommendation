@@ -30,8 +30,12 @@ describe("AdminUpload", () => {
   it("[AC-053] [AC-054] [AC-058] sends the file and shows counts and rows", async () => {
     apiFetch.mockResolvedValueOnce({
       added: 2,
-      skipped: [{ row: 3, title: "Heat", reason: "Already in the catalog" }],
-      rejected: [{ row: 2, title: "", reason: "Title is empty" }],
+      skipped: 1,
+      rejected: 1,
+      issues: [
+        { row: 3, title: "Heat", status: "skipped", reason: "Already in the catalog" },
+        { row: 2, title: "", status: "rejected", reason: "Title is empty" },
+      ],
     });
     await pick("m.csv");
     expect(await screen.findByText(/2 movies added/)).toBeInTheDocument();

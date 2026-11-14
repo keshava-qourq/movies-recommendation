@@ -33,14 +33,18 @@ def test_ac053_ac058_ac059_ac060_mixed_rows(db_session: Session) -> None:
     )
     res = _up(db_session, body)
     assert res["added"] == 1
-    assert res["skipped"] == [
-        {"row": 2, "title": f"new{t}", "reason": "Duplicate of row 1 in this file"},
-        {"row": 3, "title": f"OLD{t}", "reason": "Already in the catalog"},
+    skipped = [i for i in res["issues"] if i["status"] == "skipped"]
+    assert res["skipped"] == 2 == len(skipped)
+    assert [(i["row"], i["reason"]) for i in skipped] == [
+        (2, "Duplicate of row 1 in this file"),
+        (3, "Already in the catalog"),
     ]
-    reasons = {r["row"]: r["reason"] for r in res["rejected"]}
+    rejected = [i for i in res["issues"] if i["status"] == "rejected"]
+    assert res["rejected"] == 2 == len(rejected)
+    reasons = {r["row"]: r["reason"] for r in rejected}
     assert reasons[4] == 'Title is empty; Year "19x2" is not a number; Plot is empty'
     assert reasons[5].startswith("Year 3000 is outside 1888-")
-    assert all("title" in r for r in res["rejected"])
+    assert all("title" in r for r in res["issues"])
     movie = db_session.scalar(select(Movie).where(Movie.title == f"New{t}"))
     assert movie.genres == ["Drama", "Comedy"] and movie.cast_members == ["A", "B"]
 

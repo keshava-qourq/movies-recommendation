@@ -57,16 +57,15 @@ export default function Screen() {
       const body = new FormData();
       body.append("file", file);
       const res = await apiFetch("/admin/movies/upload", { method: "POST", body });
-      const rows = res.rejected
-        .map((r) => ({ ...r, status: "Rejected" }))
-        .concat(res.skipped.map((r) => ({ ...r, status: "Skipped" })))
+      const rows = res.issues
+        .map((r) => ({ ...r, status: r.status === "rejected" ? "Rejected" : "Skipped" }))
         .sort((x, y) => x.row - y.row);
       setResult({
         fileName: file.name,
         added: res.added,
-        skipped: res.skipped.length,
-        rejected: res.rejected.length,
-        total: res.added + res.skipped.length + res.rejected.length,
+        skipped: res.skipped,
+        rejected: res.rejected,
+        total: res.added + res.skipped + res.rejected,
         rows,
       });
       setFile(null);

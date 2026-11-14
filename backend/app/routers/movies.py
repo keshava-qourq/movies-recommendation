@@ -4,7 +4,7 @@ import math
 import threading
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, literal, literal_column, select
 from sqlalchemy.dialects.postgresql import aggregate_order_by, insert
 from sqlalchemy.orm import Session
@@ -30,9 +30,14 @@ def _movie_out(m: Movie) -> dict[str, Any]:
     }
 
 
+def _liked_ids(db: Session, user: User) -> set[int]:
+    return set(db.scalars(select(Like.movie_id).where(Like.user_id == user.id)))
+
+
 @router.get("/movies")
 def list_movies(
     db: Annotated[Session, Depends(get_db)],
+    user: Annotated[User, Depends(get_current_user)],
     q: str = "",
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
     offset: Annotated[int, Query(ge=0)] = 0,
@@ -46,7 +51,8 @@ def list_movies(
     rows = db.scalars(
         stmt.order_by(func.lower(Movie.title), Movie.id).limit(limit).offset(offset)
     ).all()
-    return {"items": [_movie_out(m) for m in rows], "total": total}
+    liked = _liked_ids(db, user)
+    return {"items": [{**_movie_out(m), "liked": m.id in liked} for m in rows], "total": total}
 
 
 def _find_movie(db: Session, movie_id: str) -> Movie:
@@ -61,8 +67,14 @@ def _find_movie(db: Session, movie_id: str) -> Movie:
 
 
 @router.get("/movies/{movie_id}")
-def movie_detail(movie_id: str, db: Annotated[Session, Depends(get_db)]) -> dict[str, Any]:
-    return _movie_out(_find_movie(db, movie_id))
+def movie_detail(
+    movie_id: str,
+    db: Annotated[Session, Depends(get_db)],
+    user: Annotated[User, Depends(get_current_user)],
+) -> dict[str, Any]:
+    m = _find_movie(db, movie_id)
+    liked = db.get(Like, (user.id, m.id)) is not None
+    return {**_movie_out(m), "liked": liked}
 
 
 _cache_lock = threading.Lock()
@@ -99,25 +111,32 @@ def _unit(vec: similarity.Vector) -> similarity.Vector:
 
 
 @router.get("/movies/{movie_id}/similar")
-def similar(movie_id: str, db: Annotated[Session, Depends(get_db)]) -> dict[str, Any]:
+def similar(
+    movie_id: str,
+    db: Annotated[Session, Depends(get_db)],
+    user: Annotated[User, Depends(get_current_user)],
+    limit: Annotated[int, Query(ge=1, le=50)] = 10,
+) -> dict[str, Any]:
     target = _find_movie(db, movie_id)
     vectors, outs = _catalog(db)
-    ranked = similarity.rank(vectors.get(target.id, {}), vectors, {target.id})
-    return {"items": [{**outs[i], "score": s} for i, s in ranked if i in outs]}
+    ranked = similarity.rank(vectors.get(target.id, {}), vectors, {target.id}, limit)
+    liked = _liked_ids(db, user)
+    return {"items": [{**outs[i], "score": s, "liked": i in liked} for i, s in ranked if i in outs]}
 
 
 @router.get("/me/for-you")
 def for_you(
     db: Annotated[Session, Depends(get_db)],
     user: Annotated[User, Depends(get_current_user)],
+    limit: Annotated[int, Query(ge=1, le=50)] = 20,
 ) -> dict[str, Any]:
-    liked_ids = set(db.scalars(select(Like.movie_id).where(Like.user_id == user.id)))
+    liked_ids = _liked_ids(db, user)
     if not liked_ids:
         return {"items": [], "has_likes": False}
     vectors, outs = _catalog(db)
     units = [_unit(vectors[i]) for i in liked_ids if i in vectors]
     profile = {t: w / len(units) for t, w in similarity.add_vectors(units).items()} if units else {}
-    ranked = similarity.rank(profile, vectors, liked_ids)
+    ranked = similarity.rank(profile, vectors, liked_ids, limit)
     items = [{**outs[i], "score": s} for i, s in ranked if i in outs]
     return {"items": items, "has_likes": True}
 
@@ -139,18 +158,18 @@ def like_movie(
     return {"movie_id": m.id, "liked": True}
 
 
-@router.delete("/movies/{movie_id}/like", status_code=204)
+@router.delete("/movies/{movie_id}/like")
 def unlike_movie(
     movie_id: str,
     db: Annotated[Session, Depends(get_db)],
     user: Annotated[User, Depends(get_current_user)],
-) -> Response:
+) -> dict[str, Any]:
     m = _find_movie(db, movie_id)
     existing = db.get(Like, (user.id, m.id))
     if existing is not None:
         db.delete(existing)
         db.commit()
-    return Response(status_code=204)
+    return {"movie_id": m.id, "liked": False}
 
 
 @router.get("/me/likes")

@@ -28,6 +28,8 @@ def _split(value: str) -> list[str]:
 def upload_movies(
     db: Annotated[Session, Depends(get_db)], file: Annotated[UploadFile, File()]
 ) -> dict[str, Any]:
+    if not (file.filename or "").lower().endswith(".csv"):
+        raise HTTPException(status_code=400, detail="File must be a .csv file")
     raw = file.file.read(MAX_UPLOAD_BYTES + 1)
     if len(raw) > MAX_UPLOAD_BYTES:
         raise HTTPException(status_code=413, detail="File is too large")
@@ -119,4 +121,9 @@ def upload_movies(
     except IntegrityError:
         db.rollback()
         raise HTTPException(status_code=409, detail="Upload conflicted; please retry") from None
-    return {"added": added, "skipped": skipped, "rejected": rejected}
+    issues = sorted(
+        [{**i, "status": "skipped"} for i in skipped]
+        + [{**i, "status": "rejected"} for i in rejected],
+        key=lambda i: i["row"],
+    )
+    return {"added": added, "skipped": len(skipped), "rejected": len(rejected), "issues": issues}
