@@ -21,7 +21,7 @@ no movie APIs, no poster images from the web, no email sending, no
 third-party login, and no AI or LLM calls. Ship a built-in sample of about
 50 well-known movies with the app, so it works right after install.
 
-**Documentation version:** v19
+**Documentation version:** v20
 <!-- sdlc:auto:end overview -->
 
 ## Contents
@@ -46,7 +46,7 @@ third-party login, and no AI or LLM calls. Ship a built-in sample of about
 | [Tests](testing/test-cases.md) | 214 tests |
 | [Deployment guide](deployment/deployment-guide.md) | deployed |
 | [Runbook](deployment/runbook.md) | deployed |
-| [Release notes](deployment/release-notes.md) | 7 releases |
+| [Release notes](deployment/release-notes.md) | 8 releases |
 | [Traceability matrix](traceability-matrix.md) | 18 requirements |
-| [Changelog](CHANGELOG.md) | 19 versions |
+| [Changelog](CHANGELOG.md) | 20 versions |
 <!-- sdlc:auto:end contents -->
