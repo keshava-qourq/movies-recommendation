@@ -279,7 +279,8 @@ export default function Screen() {
                               border: 0,
                               padding: 0,
                               cursor: "pointer",
-                              font: "inherit",
+                              fontFamily: "inherit",
+                              fontSize: "inherit",
                             }}
                           >
                             Go to log in
