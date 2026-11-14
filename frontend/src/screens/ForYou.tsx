@@ -7,8 +7,6 @@ import { brand } from "@/lib/brand";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "@/lib/api";
 
-const { Search } = Icons;
-
 // Wireframe item ids, tied to the movie they name (not to the grid position).
 const WF_ITEM = { 1: "i-2-0-0", 2: "i-2-0-1", 3: "i-2-0-2", 4: "i-2-0-3" };
 
@@ -172,8 +170,6 @@ export default function Screen() {
       setBusy(false);
     }
   };
-  const like = (m) => change(m, true);
-  const unlike = (m) => change(m, false);
 
   const btn = {
     fontFamily: brand.fontBody,
@@ -287,7 +283,7 @@ export default function Screen() {
             <h2 id="rec-h" style={{ ...label, color: P, fontSize: 12, margin: 0 }}>
               Recommended movies
             </h2>
-            <span style={{ ...label }}>
+            <span style={label}>
               {recs.length} ranked · based on {liked.length} {liked.length === 1 ? "like" : "likes"}
             </span>
           </div>
@@ -350,7 +346,7 @@ export default function Screen() {
                       className="wn-btn mt-auto"
                       aria-pressed="false"
                       aria-label={"Like " + r.title}
-                      onClick={() => like(r)}
+                      onClick={() => change(r, true)}
                       style={{ ...btnOutline, width: "100%", minHeight: 36 }}
                     >
                       <Icons.Plus aria-hidden="true" className="w-4 h-4" /> Like
@@ -374,7 +370,7 @@ export default function Screen() {
                     className="wn-chip"
                     aria-pressed="true"
                     aria-label={"Unlike " + m.title + " (" + m.year + ")"}
-                    onClick={() => unlike(m)}
+                    onClick={() => change(m, false)}
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
@@ -410,7 +406,7 @@ export default function Screen() {
         >
           <div className="grid grid-cols-3" aria-hidden="true" style={{ borderBottom: rule }}>
             {["Heat", "Casino", "Arrival"].map((t, i) => (
-              <div key={t} style={{ borderLeft: i ? rule : 0, opacity: 1 }}>
+              <div key={t} style={{ borderLeft: i ? rule : 0 }}>
                 <svg
                   viewBox="0 0 144 60"
                   preserveAspectRatio="xMidYMid slice"
