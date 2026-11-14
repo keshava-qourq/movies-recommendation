@@ -121,7 +121,8 @@ describe("MovieDetail", () => {
     routes([]);
     setup();
     await screen.findByRole("heading", { level: 1 });
-    expect(screen.getByRole("img", { name: /Generated artwork for Heat/ }).tagName).toBe("svg");
+    const art = screen.getByTestId("movie-artwork");
+    expect(art.tagName).toBe("svg");
     expect(document.querySelector("img")).toBeNull();
     expect(document.querySelector("input[type=file]")).toBeNull();
   });

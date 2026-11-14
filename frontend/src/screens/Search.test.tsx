@@ -63,11 +63,11 @@ describe("Search", () => {
   it("[AC-026] lists title and year, shows total and pages with Load more", async () => {
     apiFetch.mockResolvedValueOnce({ items: [movie(1, "Alien", 1979)], total: 2 });
     setup();
-    expect(await screen.findByText("1979")).toBeInTheDocument();
+    expect((await screen.findAllByText("1979")).length).toBeGreaterThan(0);
     expect(screen.getByText(/Showing all 2 titles/)).toBeInTheDocument();
     apiFetch.mockResolvedValueOnce({ items: [movie(2, "Heat", 1995)], total: 2 });
     await userEvent.click(screen.getByRole("button", { name: "Load more" }));
-    expect(await screen.findByText("1995")).toBeInTheDocument();
+    expect((await screen.findAllByText("1995")).length).toBeGreaterThan(0);
     const p = new URLSearchParams(String(apiFetch.mock.calls[1][0]).split("?")[1]);
     expect(p.get("limit")).toBe("100");
     expect(p.get("offset")).toBe("1");

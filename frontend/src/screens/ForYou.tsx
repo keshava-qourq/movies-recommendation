@@ -6,110 +6,10 @@ import { Icons } from "@/lib/icons";
 import { brand } from "@/lib/brand";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "@/lib/api";
+import { Artwork } from "@/lib/Artwork";
 
 // Wireframe item ids, tied to the movie they name (not to the grid position).
 const WF_ITEM = { 1: "i-2-0-0", 2: "i-2-0-1", 3: "i-2-0-2", 4: "i-2-0-3" };
-
-const hashOf = (s) => {
-  let h = 7;
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 100003;
-  return h;
-};
-
-function Artwork({ title, year, height, brand }) {
-  const h = hashOf(title + year);
-  const kind = h % 4;
-  const ink = brand.backgroundColor;
-  const bg = brand.primaryColor;
-  const shift = (h % 7) * 9;
-  const shapes = [];
-  if (kind === 0) {
-    for (let i = 0; i < 9; i++)
-      shapes.push(
-        <rect key={i} x={i * 16 + (shift % 8)} y="0" width={(i % 3) + 2} height="100" fill={ink} />,
-      );
-  } else if (kind === 1) {
-    for (let i = 1; i <= 5; i++)
-      shapes.push(
-        <circle
-          key={i}
-          cx={40 + shift}
-          cy="50"
-          r={i * 11}
-          fill="none"
-          stroke={ink}
-          strokeWidth="2"
-        />,
-      );
-  } else if (kind === 2) {
-    for (let i = 0; i < 8; i++)
-      shapes.push(
-        <line
-          key={i}
-          x1={i * 22 - 20 + shift}
-          y1="100"
-          x2={i * 22 + 40 + shift}
-          y2="0"
-          stroke={ink}
-          strokeWidth="2"
-        />,
-      );
-  } else {
-    for (let r = 0; r < 4; r++)
-      for (let c = 0; c < 9; c++)
-        if ((h >> ((r * 3 + c) % 14)) % 2 === 0)
-          shapes.push(
-            <rect
-              key={r + "-" + c}
-              x={c * 16 + 6}
-              y={r * 20 + 8}
-              width="10"
-              height="10"
-              fill={ink}
-            />,
-          );
-  }
-  const initials = title
-    .replace(/^The /, "")
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 3)
-    .toUpperCase();
-  return (
-    <svg
-      aria-hidden="true"
-      focusable="false"
-      viewBox="0 0 144 100"
-      preserveAspectRatio="xMidYMid slice"
-      style={{ display: "block", width: "100%", height, backgroundColor: bg }}
-    >
-      {shapes}
-      <rect x="0" y="72" width="144" height="28" fill={bg} />
-      <text
-        x="8"
-        y="94"
-        fill={ink}
-        fontSize="20"
-        fontWeight="700"
-        fontFamily="Helvetica Neue, Helvetica, Arial, sans-serif"
-        letterSpacing="-0.5"
-      >
-        {initials}
-      </text>
-      <text
-        x="136"
-        y="94"
-        fill={ink}
-        fontSize="11"
-        textAnchor="end"
-        fontFamily="Helvetica Neue, Helvetica, Arial, sans-serif"
-      >
-        {year}
-      </text>
-    </svg>
-  );
-}
 
 export default function Screen() {
   const navigate = useNavigate();
@@ -308,7 +208,7 @@ export default function Screen() {
                   className="wn-card flex flex-col"
                   style={{ border: rule, borderRadius: brand.radius }}
                 >
-                  <Artwork title={r.title} year={r.year} height={96} brand={brand} />
+                  <Artwork title={r.title} year={r.year} />
                   <div className="flex flex-col flex-1" style={{ padding: 12, borderTop: rule }}>
                     <div className="flex justify-between" style={label}>
                       <span>No. {String(i + 1).padStart(2, "0")}</span>

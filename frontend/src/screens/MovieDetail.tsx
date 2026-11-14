@@ -7,78 +7,9 @@ import * as UI from "@/lib/ui";
 import { Icons } from "@/lib/icons";
 import { brand } from "@/lib/brand";
 import { apiFetch, ApiError } from "@/lib/api";
+import { Artwork } from "@/lib/Artwork";
 
 const { Empty } = UI;
-
-function hashOf(str) {
-  let h = 2166136261;
-  for (let i = 0; i < str.length; i++) {
-    h ^= str.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return h >>> 0;
-}
-
-// Deterministic generated artwork: the same movie always draws the same mark.
-function Art({ movie, ink }) {
-  let seed = hashOf(movie.title + movie.year);
-  const next = () => {
-    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
-    return seed / 4294967296;
-  };
-  const cells = [];
-  for (let r = 0; r < 5; r++) {
-    for (let c = 0; c < 3; c++) {
-      if (next() > 0.45) {
-        cells.push([c, r]);
-        if (c < 2) cells.push([4 - c, r]);
-      }
-    }
-  }
-  const initials = movie.title
-    .replace(/^The\s+/i, "")
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase();
-  return (
-    <svg
-      viewBox="0 0 100 132"
-      role="img"
-      aria-label={"Generated artwork for " + movie.title}
-      style={{ display: "block", width: "100%", height: "auto" }}
-    >
-      <rect x="0" y="0" width="100" height="132" fill="#ffffff" />
-      {cells.map((p, i) => (
-        <rect key={i} x={p[0] * 20} y={p[1] * 20} width="20" height="20" fill={ink} />
-      ))}
-      <rect x="0" y="100" width="100" height="32" fill={ink} />
-      <text
-        x="8"
-        y="123"
-        fill="#ffffff"
-        fontSize="20"
-        fontWeight="700"
-        letterSpacing="-0.5"
-        fontFamily="Helvetica Neue, Helvetica, Arial, sans-serif"
-      >
-        {initials}
-      </text>
-      <text
-        x="92"
-        y="123"
-        fill="#ffffff"
-        fontSize="11"
-        textAnchor="end"
-        fontFamily="Helvetica Neue, Helvetica, Arial, sans-serif"
-        style={{ fontVariantNumeric: "tabular-nums" }}
-      >
-        {movie.year}
-      </text>
-    </svg>
-  );
-}
 
 function Heart({ filled }) {
   return (
@@ -307,7 +238,7 @@ export default function Screen() {
             style={{ alignSelf: "start" }}
           >
             <div style={{ border: rule, borderRadius: brand.radius, maxWidth: 320 }}>
-              <Art movie={movie} ink={ink} />
+              <Artwork title={movie.title} year={movie.year} decorative={false} />
             </div>
             <p style={{ ...label, marginTop: 8 }}>Generated artwork · no poster</p>
           </div>
@@ -459,7 +390,7 @@ export default function Screen() {
                     }}
                   >
                     <div style={{ border: "1px solid " + ink, marginBottom: 8 }}>
-                      <Art movie={m} ink={ink} />
+                      <Artwork title={m.title} year={m.year} />
                     </div>
                     <div
                       className="flex items-baseline justify-between"
