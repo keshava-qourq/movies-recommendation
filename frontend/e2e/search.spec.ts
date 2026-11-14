@@ -29,7 +29,7 @@ async function search(page: Page, text: string) {
 
 test("[AC-025] searching heat and HEAT both list the movie Heat", async ({ page }) => {
   await signedInViewer(page);
-  for (const text of ["heat", "HEAT"]) {
+  for (const text of ["heat", "HEAT", "Heat"]) {
     await search(page, text);
     await expect(page.getByRole("button", { name: /^Heat, \d{4}\./ }).first()).toBeVisible();
   }
@@ -70,6 +70,24 @@ test("[AC-028][NFR-004] a signed-out visit to /search ends on the login screen",
 }) => {
   await page.goto("/search");
   await expect(page).toHaveURL(/\/login/);
+});
+
+test("[AC-026] a partial title search lists Heat with title and year", async ({ page }) => {
+  await signedInViewer(page);
+  await search(page, "hea");
+  await expect(page.getByRole("button", { name: /^Heat, \d{4}\. Open movie details/ })).toBeVisible();
+});
+
+test("[AC-028][NFR-004] GET /movies without a token returns 401 and changes nothing", async ({
+  request,
+}) => {
+  const res = await request.get(`${API}/movies?q=heat`);
+  expect(res.status()).toBe(401);
+  expect((await res.json()).detail).toBe("Not authenticated");
+  const bad = await request.get(`${API}/movies?q=heat`, {
+    headers: { Authorization: `Bearer ${randomUUID()}` },
+  });
+  expect(bad.status()).toBe(401);
 });
 
 test("[AC-025] clicking a result opens the movie detail page", async ({ page }) => {
