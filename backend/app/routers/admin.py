@@ -48,31 +48,51 @@ def upload_movies(
     reader.fieldnames = header
     max_year = datetime.now(UTC).year + 5
     existing = set(db.execute(select(Movie.title_key, Movie.year)).all())
+    seen: dict[tuple[str, int], int] = {}
     added = 0
     skipped: list[dict[str, Any]] = []
     rejected: list[dict[str, Any]] = []
     try:
         for row_no, row in enumerate(reader, start=1):
             title = (row.get("title") or "").strip()
-            try:
-                year = int((row.get("year") or "").strip())
-            except ValueError:
-                year = 0
+            raw_year = (row.get("year") or "").strip()
             director = (row.get("director") or "").strip()
             plot = (row.get("plot") or "").strip()
-            if not title or not plot or not 1888 <= year <= max_year:
-                rejected.append(
-                    {"row": row_no, "reason": "Title, plot and a valid year are required"}
+            problems: list[str] = []
+            if not title:
+                problems.append("Title is empty")
+            elif len(title) > 300:
+                problems.append("Title is longer than 300 characters")
+            year = 0
+            try:
+                year = int(raw_year)
+                if not 1888 <= year <= max_year:
+                    problems.append(f"Year {year} is outside 1888-{max_year}")
+            except ValueError:
+                problems.append(
+                    "Year is empty" if not raw_year else f'Year "{raw_year}" is not a number'
                 )
-                continue
-            if len(title) > 300 or len(director) > 200:
-                rejected.append({"row": row_no, "reason": "Title or director is too long"})
+            if not plot:
+                problems.append("Plot is empty")
+            if len(director) > 200:
+                problems.append("Director is longer than 200 characters")
+            if problems:
+                rejected.append({"row": row_no, "title": title, "reason": "; ".join(problems)})
                 continue
             key = (title.lower(), year)
-            if key in existing:
-                skipped.append({"row": row_no, "reason": "Duplicate title and year"})
+            if key in seen:
+                skipped.append(
+                    {
+                        "row": row_no,
+                        "title": title,
+                        "reason": f"Duplicate of row {seen[key]} in this file",
+                    }
+                )
                 continue
-            existing.add(key)
+            seen[key] = row_no
+            if key in existing:
+                skipped.append({"row": row_no, "title": title, "reason": "Already in the catalog"})
+                continue
             db.add(
                 Movie(
                     title=title,
