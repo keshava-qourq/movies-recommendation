@@ -51,6 +51,16 @@ test("[AC-016][NFR-013] a new account uses the app immediately with no verificat
   await expect(page).toHaveURL(/\/for-you/);
   const text = (await page.locator("body").innerText()).toLowerCase();
   expect(text).not.toMatch(/verify|verification|check your (email|inbox)/);
+  const raw = await page.locator("body").innerText();
+  expect(raw).not.toMatch(new RegExp("[^\\s\\u0021-\\u007E\\u00A0-\\u024F\\u2000-\\u206F]"));
+
+  const token = await page.evaluate(() => localStorage.getItem("session_token"));
+  expect(token).toBeTruthy();
+  const me = await page.request.get(`${API}/auth/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  expect(me.status()).toBe(200);
+  expect((await me.json()).role).toBe("viewer");
 
   await page.goto("/search");
   await page.locator("#movie-search").fill("heat");
