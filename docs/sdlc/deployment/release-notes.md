@@ -7,13 +7,7 @@
 
 **Commit:** `c7f2de3`
 
-**Delivered:**
-- US-003: First admin account from server config
-- US-004: No password reset or email verification
-- US-008: Search movies by title
-- US-009: Movie detail page
-- US-012: Similarity computed in-house
-- US-013: Like and unlike movies
+_Nothing delivered in this window._
 
 ## 49dd10d241ab — 2026-11-13
 

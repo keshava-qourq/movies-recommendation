@@ -5,69 +5,74 @@
 <!-- sdlc:auto:start narrative -->
 ### DEV-US-003 · draft · source: dev:US-003
 
-Ticket US-003, 'First admin account from server config', was delivered. It is recorded in commit 444b01d5439c193495c59aaab80ecf75440d8ee3.
+First admin account from server config. Ticket status is delivered.
 
 - Ticket: US-003, First admin account from server config
 - Status: delivered
-- Commit: 444b01d5439c193495c59aaab80ecf75440d8ee3
-- No implementation notes, reviewer or approval information were provided.
+- Commit: 1bec715d3a84aed5eb193d9ba855d50ffd5f6212
+- Shares this commit with US-004.
+- Project description context: the first admin account is created from the server config.
+- No further implementation detail was provided.
 
 **Related:** US-003
 
 ### DEV-US-004 · draft · source: dev:US-004
 
-Ticket US-004, 'No password reset or email verification', was delivered. It is recorded in commit 8715d35c8d8f1caeb22866a72306522bda8a1475.
+No password reset or email verification. Ticket status is delivered.
 
 - Ticket: US-004, No password reset or email verification
 - Status: delivered
-- Commit: 8715d35c8d8f1caeb22866a72306522bda8a1475 (the same commit is recorded for US-008 and US-009)
-- No implementation notes were provided.
+- Commit: 1bec715d3a84aed5eb193d9ba855d50ffd5f6212
+- Shares this commit with US-003.
+- Project description context: the app must not send email.
+- No further implementation detail was provided.
 
 **Related:** US-004
 
 ### DEV-US-008 · draft · source: dev:US-008
 
-Ticket US-008, 'Search movies by title', was delivered. It is recorded in commit 8715d35c8d8f1caeb22866a72306522bda8a1475.
+Search movies by title. Ticket status is delivered.
 
 - Ticket: US-008, Search movies by title
 - Status: delivered
-- Commit: 8715d35c8d8f1caeb22866a72306522bda8a1475 (the same commit is recorded for US-004 and US-009)
-- No implementation notes were provided.
+- Commit: c5fd2f403d6faabd01c8738d7bbb46930e7919b4
+- No further implementation detail was provided.
 
 **Related:** US-008
 
 ### DEV-US-009 · draft · source: dev:US-009
 
-Ticket US-009, 'Movie detail page', was delivered. It is recorded in commit 8715d35c8d8f1caeb22866a72306522bda8a1475.
+Movie detail page. Ticket status is delivered.
 
 - Ticket: US-009, Movie detail page
 - Status: delivered
-- Commit: 8715d35c8d8f1caeb22866a72306522bda8a1475 (the same commit is recorded for US-004 and US-008)
-- No implementation notes were provided.
+- Commit: d62c432558f929121ba3a3e261eab438cd49b3f0
+- No further implementation detail was provided.
 
 **Related:** US-009
 
 ### DEV-US-012 · draft · source: dev:US-012
 
-Ticket US-012, 'Similarity computed in-house', failed. No commit was recorded, so this work is not delivered.
+Similarity computed in-house. Ticket status is delivered.
 
 - Ticket: US-012, Similarity computed in-house
-- Status: failed
-- Commit: none
-- The overall development run is reported as completed, but this ticket did not deliver. This appears to conflict with the run-level status, so both are recorded.
-- The input gives no failure reason, so none is stated here.
-- Follow-up is not documented in the input. The ticket remains open until a later delivery is recorded.
+- Status: delivered
+- Commit: 4e0fbffe56e4ad5a45507c022ea09e632cb3b2a6
+- Shares this commit with US-013.
+- Project description context: cosine similarity on plot, genres, director and cast, with no outside service, API or AI/LLM calls.
+- No further implementation detail was provided.
 
 **Related:** US-012
 
 ### DEV-US-013 · draft · source: dev:US-013
 
-Ticket US-013, 'Like and unlike movies', was delivered. It is recorded in commit 6ae667bcd9e85e48b9c0438cf88d5087e11d82d0.
+Like and unlike movies. Ticket status is delivered.
 
 - Ticket: US-013, Like and unlike movies
 - Status: delivered
-- Commit: 6ae667bcd9e85e48b9c0438cf88d5087e11d82d0
-- No implementation notes were provided.
+- Commit: 4e0fbffe56e4ad5a45507c022ea09e632cb3b2a6
+- Shares this commit with US-012.
+- No further implementation detail was provided.
 
 **Related:** US-013
 <!-- sdlc:auto:end narrative -->
