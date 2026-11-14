@@ -280,7 +280,6 @@ export default function Screen() {
                               padding: 0,
                               cursor: "pointer",
                               font: "inherit",
-                              fontWeight: 700,
                             }}
                           >
                             Go to log in
