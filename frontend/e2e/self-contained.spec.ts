@@ -20,7 +20,11 @@ function watch(page: Page) {
   const fonts: string[] = [];
   page.on("request", (req) => {
     urls.push(req.url());
-    if (req.resourceType() === "font" && isWeb(req.url()) && !ALLOWED.has(new URL(req.url()).origin))
+    if (
+      req.resourceType() === "font" &&
+      isWeb(req.url()) &&
+      !ALLOWED.has(new URL(req.url()).origin)
+    )
       fonts.push(req.url());
   });
   page.on("response", (res) => urls.push(res.url()));
@@ -48,9 +52,9 @@ async function domRefs(page: Page): Promise<string[]> {
     const add = (v: string | null | undefined) => {
       if (v && /^(https?:)?\/\//i.test(v.trim())) out.push(new URL(v.trim(), location.href).href);
     };
-    document.querySelectorAll("script[src], img[src], source[src]").forEach((e) =>
-      add(e.getAttribute("src")),
-    );
+    document
+      .querySelectorAll("script[src], img[src], source[src]")
+      .forEach((e) => add(e.getAttribute("src")));
     document.querySelectorAll("link[href]").forEach((e) => add(e.getAttribute("href")));
     for (const sheet of Array.from(document.styleSheets)) {
       add(sheet.href);
@@ -214,7 +218,9 @@ test("[NFR-009][AC-021][AC-022] with all other hosts aborted every flow still wo
   expect(aborted).toEqual([]);
 });
 
-test("[NFR-013] the pages visited in the self-contained flows are English only", async ({ page }) => {
+test("[NFR-013] the pages visited in the self-contained flows are English only", async ({
+  page,
+}) => {
   await adminLogin(page);
   for (const path of ["/for-you", "/search", "/admin-upload"]) {
     await page.goto(path);
