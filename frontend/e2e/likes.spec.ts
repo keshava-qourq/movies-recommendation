@@ -150,3 +150,23 @@ test("[NFR-013] the movie detail screen is English only", async ({ browser }) =>
   expect(text).not.toMatch(new RegExp("[^\\s\\u0021-\\u007E\\u00A0-\\u024F\\u2000-\\u206F]"));
   await v.ctx.close();
 });
+
+test("[NFR-004] like, unlike and my likes without a token return 401 and change nothing", async ({
+  browser,
+  request,
+}) => {
+  const v = await newViewer(browser);
+  await openDetail(v.page);
+  await likeButton(v.page).click();
+  await expect(likeButton(v.page)).toHaveAttribute("aria-pressed", "true");
+  const before = await likesFor(v.page);
+  expect(before).toHaveLength(1);
+  const id = (before[0] as unknown as { id: number }).id;
+  const put = await request.put(`${API}/movies/${id}/like`);
+  const post = await request.post(`${API}/movies/${id}/like`);
+  const del = await request.delete(`${API}/movies/${id}/like`);
+  const list = await request.get(`${API}/me/likes`);
+  expect([put.status(), post.status(), del.status(), list.status()]).toEqual([401, 401, 401, 401]);
+  expect(await likesFor(v.page)).toEqual(before);
+  await v.ctx.close();
+});
