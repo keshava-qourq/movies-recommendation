@@ -7,86 +7,11 @@ import { brand } from "@/lib/brand";
 import { useNavigate } from "react-router-dom";
 import { apiFetch, getSessionToken } from "@/lib/api";
 import { getUser } from "@/lib/auth";
+import { Artwork } from "@/lib/Artwork";
 
 const PAGE = 100;
 
 const WF_IDS = { Heat: "i-2-0-0", "Heat Wave": "i-2-0-1", "Fever Pitch": "i-2-0-2" };
-
-function hashTitle(str) {
-  let h = 2166136261;
-  for (let i = 0; i < str.length; i++) {
-    h ^= str.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return h >>> 0;
-}
-
-function initials(title) {
-  const words = title
-    .replace(/^The\s+/i, "")
-    .split(/\s+/)
-    .filter(Boolean);
-  return words
-    .slice(0, 3)
-    .map((w) => w[0].toUpperCase())
-    .join("");
-}
-
-// Deterministic artwork: same title -> same image on every page and visit.
-function Artwork({ title, brand }) {
-  let seed = hashTitle(title);
-  const next = () => {
-    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
-    return seed / 4294967296;
-  };
-  const cells = [];
-  for (let r = 0; r < 8; r++) {
-    for (let c = 0; c < 3; c++) {
-      const v = next();
-      if (v > 0.45) {
-        const fill = v > 0.82 ? brand.neutralColor : brand.primaryColor;
-        cells.push({ r, c, fill });
-        if (c < 2) cells.push({ r, c: 5 - c, fill });
-        else cells.push({ r, c: 3, fill });
-      }
-    }
-  }
-  const uniq = new Map();
-  cells.forEach((k) => uniq.set(k.r + "-" + k.c, k));
-  return (
-    <svg
-      viewBox="0 0 60 90"
-      width="100%"
-      style={{ display: "block", aspectRatio: "2 / 3" }}
-      aria-hidden="true"
-      focusable="false"
-    >
-      <rect x="0" y="0" width="60" height="90" fill={brand.backgroundColor} />
-      {Array.from(uniq.values()).map((k) => (
-        <rect
-          key={k.r + "-" + k.c}
-          x={k.c * 10}
-          y={k.r * 10}
-          width="10"
-          height="10"
-          fill={k.fill}
-        />
-      ))}
-      <rect x="0" y="80" width="60" height="10" fill={brand.primaryColor} />
-      <text
-        x="4"
-        y="87.5"
-        fontSize="7"
-        fontWeight="700"
-        letterSpacing="1.5"
-        fill={brand.backgroundColor}
-        fontFamily={brand.fontHeading}
-      >
-        {initials(title)}
-      </text>
-    </svg>
-  );
-}
 
 function Highlight({ text, query }) {
   const q = query.trim().toLowerCase();
@@ -334,7 +259,7 @@ export default function Screen() {
                   style={{ animationDelay: Math.min(idx, 10) * 15 + "ms" }}
                 >
                   <div style={{ borderBottom: rule }}>
-                    <Artwork title={m.title} brand={brand} />
+                    <Artwork title={m.title} year={m.year} />
                   </div>
                   <div style={{ padding: "8px 8px 12px" }}>
                     <div

@@ -62,7 +62,8 @@ the first admin account is created if no user with that email exists. Optionally
 ## Session settings
 
 Sign-in returns an opaque session token, sent as `Authorization: Bearer <token>`.
-A session expires after 30 minutes without any authenticated request. Each login
+A session expires after 30 minutes without any authenticated request. Set
+`SESSION_IDLE_MINUTES` to change that. Each login
 creates a new session, and logout revokes only the token used.
 
 ## CSV upload format
@@ -72,9 +73,22 @@ the same columns as the bundled sample catalog (title, year, plot, genres, direc
 cast). A movie is unique by lowercased title plus year. Rows are counted from 1
 after the header, and errors name the row.
 
+Separate several genres or cast names inside one cell with the '|' separator.
+The header line must be exactly this, in this order:
+
+```
+title,year,genres,director,cast,plot
+```
+
+Example file with one data row:
+
+```
+Heat,1995,Crime|Thriller,Michael Mann,Al Pacino|Robert De Niro,A detective hunts a crew of thieves.
+```
+
 ## Known limits
 
 - Sized for about 5,000 movies and hundreds of users, on a single instance.
 - One API worker, so the in-memory similarity index stays consistent.
-- No email sending, password reset or third-party login.
+- No email sending, password reset, email verification or third-party login. It needs no outside service.
 - Movie listing limit is at most 100 per page.

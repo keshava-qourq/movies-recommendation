@@ -70,6 +70,10 @@ describe("ForYou", () => {
     expect(open[0]).toHaveTextContent("Zed");
     expect(open[1]).toHaveTextContent("Alpha");
     expect(screen.getByText("Match 0.900")).toBeInTheDocument();
+    const keys = screen
+      .getAllByTestId("movie-artwork")
+      .map((e) => e.getAttribute("data-artwork-key"));
+    expect(keys).toEqual(["zed|2005", "alpha|2002"]);
     await userEvent.click(open[0]);
     expect(await screen.findByText("at /movie-detail?movie=5")).toBeInTheDocument();
   });

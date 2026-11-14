@@ -72,7 +72,7 @@ _cache: dict[str, Any] = {"key": None, "vectors": {}, "outs": {}}
 def _catalog(db: Session) -> tuple[dict[int, similarity.Vector], dict[int, dict[str, Any]]]:
     """Vectorised catalog, rebuilt only when the cheap fingerprint changes."""
     # The fingerprint hashes every row's content, so an edit or a delete-then-insert
-    # changes it. The rebuild runs outside the lock; the lock only swaps the snapshot.
+    # changes it. The rebuild runs under the lock so concurrent requests build it once.
     digest = func.md5(
         func.coalesce(
             func.string_agg(
@@ -83,14 +83,14 @@ def _catalog(db: Session) -> tuple[dict[int, similarity.Vector], dict[int, dict[
     )
     key = tuple(db.execute(select(func.count(Movie.id), func.max(Movie.id), digest)).one())
     with _cache_lock:
-        if _cache["key"] == key:
-            return _cache["vectors"], _cache["outs"]
-    movies = list(db.scalars(select(Movie)))
-    vectors = similarity.vectorise(movies)
-    outs = {m.id: _movie_out(m) for m in movies}
-    with _cache_lock:
-        _cache.update(key=key, vectors=vectors, outs=outs)
-    return vectors, outs
+        if _cache["key"] != key:
+            movies = list(db.scalars(select(Movie)))
+            _cache.update(
+                key=key,
+                vectors=similarity.vectorise(movies),
+                outs={m.id: _movie_out(m) for m in movies},
+            )
+        return _cache["vectors"], _cache["outs"]
 
 
 def _unit(vec: similarity.Vector) -> similarity.Vector:
@@ -103,7 +103,7 @@ def similar(movie_id: str, db: Annotated[Session, Depends(get_db)]) -> dict[str,
     target = _find_movie(db, movie_id)
     vectors, outs = _catalog(db)
     ranked = similarity.rank(vectors.get(target.id, {}), vectors, {target.id})
-    return {"items": [{**outs[i], "score": s} for i, s in ranked]}
+    return {"items": [{**outs[i], "score": s} for i, s in ranked if i in outs]}
 
 
 @router.get("/me/for-you")
@@ -118,7 +118,7 @@ def for_you(
     units = [_unit(vectors[i]) for i in liked_ids if i in vectors]
     profile = {t: w / len(units) for t, w in similarity.add_vectors(units).items()} if units else {}
     ranked = similarity.rank(profile, vectors, liked_ids)
-    items = [{**outs[i], "score": s} for i, s in ranked]
+    items = [{**outs[i], "score": s} for i, s in ranked if i in outs]
     return {"items": items, "has_likes": True}
 
 
