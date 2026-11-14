@@ -103,7 +103,9 @@ test("[AC-053][AC-054][AC-055][NFR-015] valid upload adds rows, shows counts, sp
   expect(body).toContain(`Actor B${s}`);
   expect(body).not.toContain("|");
   await expect(page.getByRole("heading", { name: "Similar movies" })).toBeVisible();
-  await expect(page.getByRole("button", { name: new RegExp(`${t2}.*Open details$`) })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: new RegExp(`${t2}.*Open details$`) }),
+  ).toBeVisible();
 });
 
 test("[AC-056][NFR-015] a .txt file is refused, says nothing was added, and its title is not searchable", async ({
@@ -191,7 +193,7 @@ test("[AC-058][NFR-015] rejected rows list row number and reason, and valid rows
     const row = rows.filter({ has: page.getByRole("cell", { name: n, exact: true }) });
     await expect(row).toHaveCount(1);
     await expect(row).toContainText(/rejected/i);
-    expect(((await row.innerText()).replace(/\s+/g, " ").trim().length)).toBeGreaterThan(12);
+    expect((await row.innerText()).replace(/\s+/g, " ").trim().length).toBeGreaterThan(12);
   }
   expect(await countFor(request, await adminToken(request), s)).toBe(1);
 });
@@ -276,7 +278,12 @@ test("[NFR-013][NFR-015] the upload page and its result are English only", async
   const s = sfx();
   await openUpload(page);
   expect(await page.locator("body").innerText()).not.toMatch(NON_ENGLISH);
-  await uploadFile(page, "e.csv", "text/csv", `${HEADER}\nEng ${s},2001,Drama,D,A,Plot\n,2002,D,D,A,P\n`);
+  await uploadFile(
+    page,
+    "e.csv",
+    "text/csv",
+    `${HEADER}\nEng ${s},2001,Drama,D,A,Plot\n,2002,D,D,A,P\n`,
+  );
   await expect(card(page, "Added")).toBeVisible();
   expect(await page.locator("body").innerText()).not.toMatch(NON_ENGLISH);
 });
