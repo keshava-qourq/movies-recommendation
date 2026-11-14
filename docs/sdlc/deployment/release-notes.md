@@ -7,10 +7,7 @@
 
 **Commit:** `2387b68`
 
-**Delivered:**
-- US-006: No outside dependencies at build or run time
-- US-010: Generated placeholder artwork
-- US-018: Setup and usage guide
+_Nothing delivered in this window._
 
 ## 1f5a07a72324 — 2026-11-14
 

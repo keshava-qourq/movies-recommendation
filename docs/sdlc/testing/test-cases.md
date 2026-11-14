@@ -3,9 +3,9 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start summary -->
-208 tests · Passed 198 · Failed 0 · Skipped 0 · Not run 10
+214 tests · Passed 204 · Failed 0 · Skipped 0 · Not run 10
 
-Acceptance criteria covered: 63/64 · passing: 59/64
+Acceptance criteria covered: 64/64 · passing: 60/64
 <!-- sdlc:auto:end summary -->
 
 <!-- sdlc:auto:start tests -->
@@ -270,6 +270,8 @@ Acceptance criteria covered: 63/64 · passing: 59/64
 | AC-021 | self-contained build > [AC-021] no web font is loaded from a web address | Unit | Passed | `frontend/src/self-contained.test.ts` |
 | AC-021 | self-contained build > [AC-021] other http(s) URLs are only SVG xmlns declarations | Unit | Passed | `frontend/src/self-contained.test.ts` |
 | AC-021 | self-contained build > [AC-021] scans index.html and the source files | Unit | Passed | `frontend/src/self-contained.test.ts` |
+| AC-020, AC-022, NFR-009 | test_ac020_ac022_nfr009_features_make_no_outside_connections | Integration | Passed | `backend/tests/integration/test_us006_no_outside_calls.py` |
+| AC-021 | test_ac021_index_html_links_only_local_assets | Integration | Passed | `backend/tests/integration/test_us006_no_outside_calls.py` |
 | AC-021, NFR-009 | [AC-021][NFR-009] every request on every page goes to the SPA or API origin and no font comes from elsewhere | E2E | Not run yet | `frontend/e2e/self-contained.spec.ts` |
 | AC-021, NFR-009 | [AC-021][NFR-009] no stylesheet, script, link or image references a third-party host | E2E | Not run yet | `frontend/e2e/self-contained.spec.ts` |
 | AC-022, NFR-009 | [AC-022][NFR-009] search, similar, like and unlike, For you and upload contact only the SPA and API hosts | E2E | Not run yet | `frontend/e2e/self-contained.spec.ts` |
@@ -285,6 +287,10 @@ Acceptance criteria covered: 63/64 · passing: 59/64
 | AC-033 | Artwork > [AC-033] different titles differ | Unit | Passed | `frontend/src/lib/Artwork.test.tsx` |
 | AC-033 | Artwork > [AC-033] same input renders identical markup twice | Unit | Passed | `frontend/src/lib/Artwork.test.tsx` |
 | AC-033 | Artwork > [AC-033] same title in a different year differs | Unit | Passed | `frontend/src/lib/Artwork.test.tsx` |
+| AC-032 | test_ac032_every_movie_screen_uses_the_artwork | Integration | Passed | `backend/tests/integration/test_us010_artwork.py` |
+| AC-032, NFR-009 | test_ac032_nfr009_artwork_is_drawn_by_the_app_without_outside_assets | Integration | Passed | `backend/tests/integration/test_us010_artwork.py` |
+| AC-033, NFR-014 | test_ac033_nfr014_artwork_depends_only_on_title_and_year | Integration | Passed | `backend/tests/integration/test_us010_artwork.py` |
+| NFR-013 | test_nfr013_artwork_source_is_english_latin | Integration | Passed | `backend/tests/integration/test_us010_artwork.py` |
 | AC-032 | [AC-032] every Search tile, the detail main and similar movies, and For you cards have artwork | E2E | Not run yet | `frontend/e2e/artwork.spec.ts` |
 | AC-032, NFR-009 | [AC-032][NFR-009] artwork uses no <img> and no image is requested from another origin | E2E | Not run yet | `frontend/e2e/artwork.spec.ts` |
 | AC-033, NFR-014 | [AC-033][NFR-014] Heat artwork is identical on Search, detail, similar and For you, after reload and in a second context | E2E | Not run yet | `frontend/e2e/artwork.spec.ts` |
