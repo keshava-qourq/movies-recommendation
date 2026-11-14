@@ -75,7 +75,9 @@ test("[AC-028][NFR-004] a signed-out visit to /search ends on the login screen",
 test("[AC-026] a partial title search lists Heat with title and year", async ({ page }) => {
   await signedInViewer(page);
   await search(page, "hea");
-  await expect(page.getByRole("button", { name: /^Heat, \d{4}\. Open movie details/ })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /^Heat, \d{4}\. Open movie details/ }),
+  ).toBeVisible();
 });
 
 test("[AC-028][NFR-004] GET /movies without a token returns 401 and changes nothing", async ({
