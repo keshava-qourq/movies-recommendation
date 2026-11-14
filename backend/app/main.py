@@ -43,8 +43,8 @@ app = FastAPI(
 )
 
 # The SPA runs on a different origin than the API. Only that origin is allowed (set by
-# ALLOWED_ORIGINS when deployed). Sessions travel as a Bearer header, never a cookie, so
-# credentials are not allowed.
+# ALLOWED_ORIGINS when deployed; CORS_ALLOWED_ORIGINS overrides it). Sessions travel as
+# a Bearer header, never a cookie, so credentials are not allowed.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=get_settings().allowed_origins,

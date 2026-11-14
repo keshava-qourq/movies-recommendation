@@ -37,8 +37,6 @@ class UTCDateTime(TypeDecorator):
         return value
 
 
-
-
 class User(Base):
     __tablename__ = "users"
     __table_args__ = (CheckConstraint("role in ('viewer','admin')", name="ck_users_role"),)

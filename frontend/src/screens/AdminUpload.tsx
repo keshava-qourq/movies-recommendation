@@ -5,229 +5,18 @@ import React from "react";
 import * as UI from "@/lib/ui";
 import { Icons } from "@/lib/icons";
 import { brand } from "@/lib/brand";
+import { apiFetch, ApiError } from "@/lib/api";
 
 const { Button, Input, Label, Table, THead, TBody, TR, TH, TD, Empty } = UI;
 
 const { Check, Upload } = Icons;
-
-const REQUIRED_COLUMNS = ["title", "year", "genres", "director", "cast", "plot"];
-const MAX_YEAR = new Date().getFullYear() + 1;
-const MIN_YEAR = 1888;
-
-const INITIAL_CATALOG = [
-  "heat|1995",
-  "blade runner|1982",
-  "the departed|2006",
-  "parasite|2019",
-  "alien|1979",
-  "inception|2010",
-  "casablanca|1942",
-  "the godfather|1972",
-  "goodfellas|1990",
-  "arrival|2016",
-  "spirited away|2001",
-  "seven samurai|1954",
-  "the matrix|1999",
-  "amelie|2001",
-  "whiplash|2014",
-];
-
-const LAST_UPLOAD = {
-  fileName: "catalog-batch-02.csv",
-  at: "12 Nov 2026, 16:40",
-  total: 47,
-  added: 42,
-  skipped: 3,
-  rejected: 2,
-  rows: [
-    {
-      row: 7,
-      title: "Blade Runner",
-      status: "Skipped",
-      reason: "Already in the catalog as Blade Runner (1982).",
-    },
-    {
-      row: 18,
-      title: "The Departed",
-      status: "Skipped",
-      reason: "Already in the catalog as The Departed (2006).",
-    },
-    { row: 24, title: "", status: "Rejected", reason: "Title is empty." },
-    {
-      row: 31,
-      title: "Parasite",
-      status: "Skipped",
-      reason: "Duplicate of row 12 in this file; only the first is added.",
-    },
-    { row: 40, title: "Solaris", status: "Rejected", reason: 'Year "19x2" is not a number.' },
-  ],
-};
-
-function parseCSV(text) {
-  const records = [];
-  let field = "";
-  let rec = [];
-  let inQuotes = false;
-  let i = 0;
-  const src = text.replace(/^﻿/, "");
-  while (i < src.length) {
-    const c = src[i];
-    if (inQuotes) {
-      if (c === '"') {
-        if (src[i + 1] === '"') {
-          field += '"';
-          i += 2;
-          continue;
-        }
-        inQuotes = false;
-        i++;
-        continue;
-      }
-      field += c;
-      i++;
-      continue;
-    }
-    if (c === '"') {
-      inQuotes = true;
-      i++;
-      continue;
-    }
-    if (c === ",") {
-      rec.push(field);
-      field = "";
-      i++;
-      continue;
-    }
-    if (c === "\r") {
-      i++;
-      continue;
-    }
-    if (c === "\n") {
-      rec.push(field);
-      records.push(rec);
-      rec = [];
-      field = "";
-      i++;
-      continue;
-    }
-    field += c;
-    i++;
-  }
-  if (inQuotes) return { error: "A quoted value is never closed, so the file is not valid CSV." };
-  if (field !== "" || rec.length) {
-    rec.push(field);
-    records.push(rec);
-  }
-  return { records };
-}
-
-function processCsv(text, fileName, catalogKeys) {
-  const parsed = parseCSV(text);
-  if (parsed.error) return { error: parsed.error };
-  const records = parsed.records;
-  if (!records.length || records.every((r) => r.every((f) => f.trim() === ""))) {
-    return { error: "The file is empty. Add a header row and at least one movie." };
-  }
-  const header = records[0].map((h) => h.trim().toLowerCase());
-  const missing = REQUIRED_COLUMNS.filter((c) => !header.includes(c));
-  if (missing.length) {
-    return {
-      error:
-        "Missing required column" +
-        (missing.length > 1 ? "s" : "") +
-        ": " +
-        missing.join(", ") +
-        ".",
-    };
-  }
-  const idx = {};
-  REQUIRED_COLUMNS.forEach((c) => {
-    idx[c] = header.indexOf(c);
-  });
-  const existing = new Set(catalogKeys);
-  const seenInFile = new Map();
-  const rows = [];
-  const addedKeys = [];
-  let added = 0,
-    skipped = 0,
-    rejected = 0,
-    total = 0;
-  for (let r = 1; r < records.length; r++) {
-    const rec = records[r];
-    if (rec.every((f) => f.trim() === "")) continue;
-    total++;
-    const rowNo = r + 1;
-    const get = (c) => (rec[idx[c]] || "").trim();
-    const title = get("title");
-    const yearRaw = get("year");
-    const plot = get("plot");
-    const problems = [];
-    if (!title) problems.push("Title is empty.");
-    if (!/^\d+$/.test(yearRaw)) {
-      problems.push(yearRaw ? 'Year "' + yearRaw + '" is not a number.' : "Year is empty.");
-    } else if (Number(yearRaw) < MIN_YEAR || Number(yearRaw) > MAX_YEAR) {
-      problems.push("Year " + yearRaw + " is outside " + MIN_YEAR + "–" + MAX_YEAR + ".");
-    }
-    if (!plot) problems.push("Plot is empty.");
-    if (problems.length) {
-      rejected++;
-      rows.push({ row: rowNo, title, status: "Rejected", reason: problems.join(" ") });
-      continue;
-    }
-    const key = title.toLowerCase() + "|" + yearRaw;
-    if (existing.has(key)) {
-      skipped++;
-      rows.push({
-        row: rowNo,
-        title,
-        status: "Skipped",
-        reason: "Already in the catalog as " + title + " (" + yearRaw + ").",
-      });
-      continue;
-    }
-    if (seenInFile.has(key)) {
-      skipped++;
-      rows.push({
-        row: rowNo,
-        title,
-        status: "Skipped",
-        reason:
-          "Duplicate of row " + seenInFile.get(key) + " in this file; only the first is added.",
-      });
-      continue;
-    }
-    seenInFile.set(key, rowNo);
-    addedKeys.push(key);
-    added++;
-  }
-  const at = new Date().toLocaleString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  return { result: { fileName, at, total, added, skipped, rejected, rows }, addedKeys };
-}
 
 export default function Screen() {
   const [file, setFile] = React.useState(null);
   const [inputKey, setInputKey] = React.useState(0);
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState("");
-  const [result, setResult] = React.useState(LAST_UPLOAD);
-  const [isSample, setIsSample] = React.useState(true);
-  const [catalog, setCatalog] = React.useState(INITIAL_CATALOG);
-  const alive = React.useRef(true);
-  const timer = React.useRef(null);
-
-  React.useEffect(() => {
-    alive.current = true;
-    return () => {
-      alive.current = false;
-      if (timer.current) clearTimeout(timer.current);
-    };
-  }, []);
+  const [result, setResult] = React.useState(null);
 
   const ink = brand.primaryColor;
   const accent = brand.accentColor;
@@ -247,7 +36,7 @@ export default function Screen() {
     setError("");
   };
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     if (busy) return;
     if (!file) {
@@ -264,31 +53,38 @@ export default function Screen() {
     }
     setBusy(true);
     setError("");
-    file
-      .text()
-      .then((text) => {
-        timer.current = setTimeout(() => {
-          if (!alive.current) return;
-          const out = processCsv(text, file.name, catalog);
-          setBusy(false);
-          if (out.error) {
-            setError(out.error + " Nothing was added.");
-            return;
-          }
-          setResult(out.result);
-          setIsSample(false);
-          setCatalog((c) => c.concat(out.addedKeys));
-          setFile(null);
-          setInputKey((k) => k + 1);
-        }, 700);
-      })
-      .catch(() => {
-        if (!alive.current) return;
-        setBusy(false);
-        setError(
-          "The browser could not read that file. Check that it is not open elsewhere and try again.",
-        );
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      const res = await apiFetch("/admin/movies/upload", { method: "POST", body });
+      const rows = res.rejected
+        .map((r) => ({ ...r, status: "Rejected" }))
+        .concat(res.skipped.map((r) => ({ ...r, status: "Skipped" })))
+        .sort((x, y) => x.row - y.row);
+      setResult({
+        fileName: file.name,
+        added: res.added,
+        skipped: res.skipped.length,
+        rejected: res.rejected.length,
+        total: res.added + res.skipped.length + res.rejected.length,
+        rows,
       });
+      setFile(null);
+      setInputKey((k) => k + 1);
+    } catch (err) {
+      const status = err instanceof ApiError ? err.status : 0;
+      if (status === 401 || status === 403) {
+        setError("Access denied: only admins can upload movies. Nothing was added.");
+      } else {
+        const detail =
+          err instanceof ApiError && typeof err.detail === "string"
+            ? err.detail
+            : "The upload failed. Try again.";
+        setError(detail + " Nothing was added.");
+      }
+    } finally {
+      setBusy(false);
+    }
   };
 
   const sizeLabel = file
@@ -297,31 +93,33 @@ export default function Screen() {
       : (file.size / 1024).toFixed(1) + " KB"
     : "";
 
-  const cards = [
-    {
-      id: "b-3-0",
-      name: "Added",
-      value: result.added,
-      hint: "Rows inserted as new movies",
-      flag: false,
-    },
-    {
-      id: "b-3-1",
-      name: "Skipped as duplicates",
-      value: result.skipped,
-      hint: "Same title and year already exists",
-      flag: false,
-    },
-    {
-      id: "b-3-2",
-      name: "Rejected",
-      value: result.rejected,
-      hint: "Failed validation, listed below",
-      flag: result.rejected > 0,
-    },
-  ];
+  const cards = !result
+    ? []
+    : [
+        {
+          id: "b-3-0",
+          name: "Added",
+          value: result.added,
+          hint: "Rows inserted as new movies",
+          flag: false,
+        },
+        {
+          id: "b-3-1",
+          name: "Skipped as duplicates",
+          value: result.skipped,
+          hint: "Same title and year already exists",
+          flag: false,
+        },
+        {
+          id: "b-3-2",
+          name: "Rejected",
+          value: result.rejected,
+          hint: "Failed validation, listed below",
+          flag: result.rejected > 0,
+        },
+      ];
 
-  const problemRows = result.rows;
+  const problemRows = result ? result.rows : [];
 
   return (
     <div
@@ -433,7 +231,7 @@ export default function Screen() {
                   {file.name} · {sizeLabel}. Ready to upload.
                 </span>
               ) : (
-                "Header row first. Rows are numbered as in your spreadsheet, so the header is row 1."
+                "Header row first. Row 1 is the first data row after the header."
               )}
             </p>
             {error ? (
@@ -511,17 +309,17 @@ export default function Screen() {
               id="result-heading"
               style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-0.01em", margin: 0 }}
             >
-              {isSample ? "Last upload" : "Upload result"}
+              Upload result
             </h2>
             <p
               aria-live="polite"
               style={{ fontSize: 12, color: muted, margin: 0, fontVariantNumeric: "tabular-nums" }}
             >
-              {result.fileName} · {result.at} · {result.total} data rows
+              {result ? result.fileName + " · " + result.total + " data rows" : "No upload yet"}
             </p>
           </div>
 
-          {!isSample && result.added > 0 ? (
+          {result && result.added > 0 ? (
             <p
               className="wn-row"
               role="status"
@@ -543,14 +341,21 @@ export default function Screen() {
               </span>
             </p>
           ) : null}
-          {!isSample && result.added === 0 ? (
+          {result && result.added === 0 ? (
             <p className="wn-row" role="status" style={{ fontSize: 13, margin: "12px 0 0" }}>
               <strong>No new movies were added.</strong> Every row was skipped or rejected; see the
               table below.
             </p>
           ) : null}
 
-          {/* Row 4 */}
+          {!result ? (
+            <div className="mt-4">
+              <Empty
+                title="No upload yet"
+                description="Choose a CSV file and press Upload to see the added, skipped and rejected counts."
+              />
+            </div>
+          ) : null}
           <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-12">
             {cards.map((c) => (
               <div
@@ -603,8 +408,12 @@ export default function Screen() {
           {problemRows.length === 0 ? (
             <div style={{ border: rule, padding: 24 }}>
               <Empty
-                title="Every row went in cleanly"
-                description="No rows were rejected or skipped in this upload, so there is nothing to fix in your file."
+                title={result ? "Every row went in cleanly" : "No upload yet"}
+                description={
+                  result
+                    ? "No rows were rejected or skipped in this upload, so there is nothing to fix in your file."
+                    : "Rejected and skipped rows appear here after an upload."
+                }
               />
             </div>
           ) : (
