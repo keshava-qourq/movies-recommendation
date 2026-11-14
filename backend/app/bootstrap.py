@@ -47,6 +47,7 @@ def seed_movies(db: Session, path: Path = SAMPLE_MOVIES_PATH) -> int:
         db.commit()
     except IntegrityError:
         # Another worker seeded the catalog first.
+        logger.warning("sample catalog seeding conflicted with another worker; skipped")
         db.rollback()
         return 0
     return added

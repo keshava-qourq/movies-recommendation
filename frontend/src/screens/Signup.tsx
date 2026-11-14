@@ -10,6 +10,8 @@ import { apiFetch, ApiError, setSessionToken, type AuthResponse } from "@/lib/ap
 import { setUser } from "@/lib/auth";
 
 const { Button, Input, Label } = UI;
+const BOLD = 700;
+const SEMIBOLD = 600;
 
 const TAKEN_MESSAGE =
   "An account already exists for this email. Log in instead, or use a different address.";
@@ -109,7 +111,7 @@ export default function Screen() {
   const labelStyle = {
     display: "block",
     fontSize: 12,
-    fontWeight: 700,
+    fontWeight: BOLD,
     letterSpacing: "0.08em",
     textTransform: "uppercase",
     color: ink,
@@ -124,7 +126,7 @@ export default function Screen() {
     fontSize: 13,
     lineHeight: 1.4,
     color: accent,
-    fontWeight: 600,
+    fontWeight: SEMIBOLD,
   };
 
   const meetsLength = password.length >= 8;
@@ -172,7 +174,7 @@ export default function Screen() {
           <span
             style={{
               fontSize: 14,
-              fontWeight: 700,
+              fontWeight: BOLD,
               letterSpacing: "0.12em",
               textTransform: "uppercase",
             }}
@@ -187,7 +189,7 @@ export default function Screen() {
               style={{
                 fontSize: 40,
                 lineHeight: 1.1,
-                fontWeight: 700,
+                fontWeight: BOLD,
                 letterSpacing: "-0.03em",
                 margin: 0,
                 fontFamily: brand.fontHeading,
@@ -222,7 +224,7 @@ export default function Screen() {
                 id="signup-heading"
                 style={{
                   fontSize: 12,
-                  fontWeight: 700,
+                  fontWeight: BOLD,
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
                   margin: "0 0 24px",
@@ -274,7 +276,7 @@ export default function Screen() {
                             style={{
                               color: accent,
                               textDecoration: "underline",
-                              fontWeight: 700,
+                              fontWeight: BOLD,
                               background: "none",
                               border: 0,
                               padding: 0,
@@ -335,7 +337,7 @@ export default function Screen() {
                   fontSize: 13,
                   color: meetsLength ? ink : muted,
                   fontVariantNumeric: "tabular-nums",
-                  fontWeight: meetsLength ? 700 : 400,
+                  fontWeight: meetsLength ? BOLD : 400,
                   marginBottom: 24,
                 }}
               >
@@ -369,7 +371,7 @@ export default function Screen() {
                 borderRadius: 2,
                 fontFamily: font,
                 fontSize: 14,
-                fontWeight: 700,
+                fontWeight: BOLD,
                 letterSpacing: "0.04em",
                 cursor: busy ? "default" : "pointer",
                 opacity: busy ? 0.85 : 1,
@@ -392,7 +394,7 @@ export default function Screen() {
                     gap: 8,
                     marginTop: 12,
                     fontSize: 14,
-                    fontWeight: 700,
+                    fontWeight: BOLD,
                   }}
                 >
                   <span aria-hidden="true" style={{ display: "inline-flex" }}>
@@ -445,7 +447,7 @@ export default function Screen() {
               >
                 Already have an account?{" "}
                 <span
-                  style={{ fontWeight: 700, textDecoration: "underline", textUnderlineOffset: 3 }}
+                  style={{ fontWeight: BOLD, textDecoration: "underline", textUnderlineOffset: 3 }}
                 >
                   Log in
                 </span>

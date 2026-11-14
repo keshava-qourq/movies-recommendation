@@ -67,7 +67,7 @@ jobs:
       - name: Build the frontend
         working-directory: frontend
         run: |
-          npm install --no-audit --no-fund
+          npm install --no-audit --no-fund --ignore-scripts
           npm run build
         env:
           # Baked in at build time: the bundler inlines this into the bundle, so one built
@@ -76,7 +76,6 @@ jobs:
           # the way an AWS-assigned hostname would have to be. The variable name is the
           # frontend's own, because a bundler inlines only its own prefix.
           VITE_API_BASE_URL: https://52-34-28-126.sslip.io/apps/d4a07c9e7733/
-          NEXT_PUBLIC_API_SECRET_KEY: "d4a07c9e-7733-4530-91d3-1173b4982d6d"
           VITE_API_SECRET_KEY: "d4a07c9e-7733-4530-91d3-1173b4982d6d"
 
       - name: Deploy the frontend
