@@ -3,6 +3,18 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start releases -->
+## bb848d08c8ff — 2026-11-14
+
+**Commit:** `bb848d0`
+
+**Delivered:**
+- US-003: First admin account from server config
+- US-004: No password reset or email verification
+- US-008: Search movies by title
+- US-009: Movie detail page
+- US-012: Similarity computed in-house
+- US-013: Like and unlike movies
+
 ## c7f2de3c321b — 2026-11-14
 
 **Commit:** `c7f2de3`
