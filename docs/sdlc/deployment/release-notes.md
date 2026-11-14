@@ -3,6 +3,17 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start releases -->
+## 1f5a07a72324 — 2026-11-14
+
+**Commit:** `1f5a07a`
+
+**Delivered:**
+- US-011: See similar movies ranked by similarity
+- US-014: For you list from all likes
+- US-015: Prompt when there are no likes
+- US-016: Upload movies from a CSV file
+- US-017: Validate rows and handle duplicates
+
 ## bb848d08c8ff — 2026-11-14
 
 **Commit:** `bb848d0`
