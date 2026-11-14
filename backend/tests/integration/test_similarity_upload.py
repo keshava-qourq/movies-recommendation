@@ -59,8 +59,10 @@ def test_ac039_ac040_ac041_nfr012_hand_calculated_scores_via_upload(monkeypatch)
 
         def cos(u: dict, v: dict) -> float:
             dot = sum(w * v[k] for k, w in u.items() if k in v)
-            return dot / (math.sqrt(sum(w * w for w in u.values()))
-                          * math.sqrt(sum(w * w for w in v.values())))
+            return dot / (
+                math.sqrt(sum(w * w for w in u.values()))
+                * math.sqrt(sum(w * w for w in v.values()))
+            )
 
         resp = c.get(f"/movies/{ids['Sim' + 'A' + r]}/similar", headers=admin)
         assert resp.status_code == 200
