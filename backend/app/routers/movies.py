@@ -1,5 +1,6 @@
 """Signed-in movie feature entry points (NFR-004)."""
 
+import threading
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
@@ -63,13 +64,32 @@ def movie_detail(movie_id: str, db: Annotated[Session, Depends(get_db)]) -> dict
     return _movie_out(_find_movie(db, movie_id))
 
 
+_cache_lock = threading.Lock()
+_cache: dict[str, Any] = {"key": None, "vectors": {}, "outs": {}}
+
+
+def _catalog(db: Session) -> tuple[dict[int, similarity.Vector], dict[int, dict[str, Any]]]:
+    """Vectorised catalog, rebuilt only when the cheap fingerprint changes."""
+    key = tuple(
+        db.execute(
+            select(func.count(Movie.id), func.max(Movie.id), func.max(Movie.created_at))
+        ).one()
+    )
+    with _cache_lock:
+        if _cache["key"] != key:
+            movies = list(db.scalars(select(Movie)))
+            _cache["vectors"] = similarity.vectorise(movies)
+            _cache["outs"] = {m.id: _movie_out(m) for m in movies}
+            _cache["key"] = key
+        return _cache["vectors"], _cache["outs"]
+
+
 @router.get("/movies/{movie_id}/similar")
 def similar(movie_id: str, db: Annotated[Session, Depends(get_db)]) -> dict[str, Any]:
     target = _find_movie(db, movie_id)
-    movies = {m.id: m for m in db.scalars(select(Movie))}
-    vectors = similarity.vectorise(movies.values())
-    ranked = similarity.rank(vectors[target.id], vectors, {target.id})
-    return {"items": [{**_movie_out(movies[i]), "score": s} for i, s in ranked]}
+    vectors, outs = _catalog(db)
+    ranked = similarity.rank(vectors.get(target.id, {}), vectors, {target.id})
+    return {"items": [{**outs[i], "score": s} for i, s in ranked]}
 
 
 @router.get("/me/for-you")
