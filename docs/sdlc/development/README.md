@@ -3,41 +3,41 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start narrative -->
-### DEV-US-006 · draft · source: dev:US-006
+### DEV-US-006 · approved · source: dev:US-006
 
-The ticket 'No outside dependencies at build or run time' failed and has no commit. No code was delivered for it in this run. The requirement is still open.
+Ticket US-006, 'No outside dependencies at build or run time', was delivered. It addresses the requirement that the app be fully self-contained.
 
-- Ticket: US-006, No outside dependencies at build or run time
-- Status: failed
-- Commit: none
-- Failure cause: not stated in the input
-- Impact: the project brief requires the app to be fully self-contained. That means no outside services, APIs or downloads at build or run time, and no movie APIs, web poster images, email sending, third-party login or AI/LLM calls. No delivered work for this requirement is recorded.
-- Follow-up: the cause of the failure and the remediation plan were not provided and need human or agent input.
+- Ticket: US-006
+- Title: No outside dependencies at build or run time
+- Status: delivered
+- Commit: 06de03e1021805180fd1812fb5150854c970f84d
+- Shares this commit with US-010.
+- Implementation approach, files changed and verification results were not provided in the input.
 
 **Related:** US-006
 
-### DEV-US-010 · draft · source: dev:US-010
+### DEV-US-010 · approved · source: dev:US-010
 
-The ticket 'Generated placeholder artwork' was delivered in commit ce4417e65e2f88d7b8ecdaa4b6e1a8a96e7aef8b. It supports the self-contained requirement, since the brief rules out poster images from the web.
+Ticket US-010, 'Generated placeholder artwork', was delivered.
 
-- Ticket: US-010, Generated placeholder artwork
+- Ticket: US-010
+- Title: Generated placeholder artwork
 - Status: delivered
-- Commit: ce4417e65e2f88d7b8ecdaa4b6e1a8a96e7aef8b
-- Implementation details (how the artwork is generated, where it is used): not provided in the input
-- Context: the project brief says no poster images may be fetched from the web.
-- Verification: no test results or approvals were provided for this ticket.
+- Commit: 06de03e1021805180fd1812fb5150854c970f84d
+- Shares this commit with US-006.
+- How the artwork is generated, its appearance and where it is shown were not provided in the input.
 
-**Related:** US-010
+**Related:** US-010, US-006
 
-### DEV-US-018 · draft · source: dev:US-018
+### DEV-US-018 · approved · source: dev:US-018
 
-The ticket 'Setup and usage guide' was delivered in commit ce4417e65e2f88d7b8ecdaa4b6e1a8a96e7aef8b. The input does not include the guide's contents.
+Ticket US-018, 'Setup and usage guide', was delivered in its own commit.
 
-- Ticket: US-018, Setup and usage guide
+- Ticket: US-018
+- Title: Setup and usage guide
 - Status: delivered
-- Commit: ce4417e65e2f88d7b8ecdaa4b6e1a8a96e7aef8b (the same commit as US-010)
-- Guide contents, format and location: not provided in the input
-- Note: US-006 (no outside dependencies) failed in the same run. Any statements in the guide about being self-contained should be checked against the final state of that requirement.
+- Commit: d62c432558f929121ba3a3e261eab438cd49b3f0
+- The content and location of the guide were not provided in the input.
 
 **Related:** US-018
 <!-- sdlc:auto:end narrative -->
