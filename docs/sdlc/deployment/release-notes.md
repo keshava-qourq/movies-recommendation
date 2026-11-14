@@ -3,6 +3,15 @@
 > Maintained by QuorQ AI SDLC. Text between `sdlc:auto` markers is regenerated; anything outside them is yours and is kept.
 
 <!-- sdlc:auto:start releases -->
+## 2387b68d9d99 — 2026-11-14
+
+**Commit:** `2387b68`
+
+**Delivered:**
+- US-006: No outside dependencies at build or run time
+- US-010: Generated placeholder artwork
+- US-018: Setup and usage guide
+
 ## 1f5a07a72324 — 2026-11-14
 
 **Commit:** `1f5a07a`
