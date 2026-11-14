@@ -280,7 +280,6 @@ export default function Screen() {
                               padding: 0,
                               cursor: "pointer",
                               font: "inherit",
-                              fontWeight: 700,
                             }}
                           >
                             Go to log in
@@ -419,7 +418,7 @@ export default function Screen() {
               Enter a valid email. Password must be at least 8 characters.
             </p>
             <p style={{ margin: "4px 0 0", fontSize: 13, lineHeight: 1.5, color: muted }}>
-              There is no email to confirm. You are signed in as soon as the account exists.
+              You are signed in as soon as the account exists.
             </p>
           </div>
           <div className="col-span-12 md:col-span-6" />

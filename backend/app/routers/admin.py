@@ -7,7 +7,7 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy import select
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -90,7 +90,7 @@ def upload_movies(
         raise HTTPException(status_code=400, detail="File is not a valid CSV") from None
     try:
         db.commit()
-    except SQLAlchemyError:
+    except IntegrityError:
         db.rollback()
         raise HTTPException(status_code=409, detail="Upload conflicted; please retry") from None
     return {"added": added, "skipped": skipped, "rejected": rejected}

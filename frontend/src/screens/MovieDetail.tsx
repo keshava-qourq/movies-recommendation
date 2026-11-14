@@ -110,6 +110,7 @@ export default function Screen() {
   const [movie, setMovie] = React.useState(null);
   const [isLiked, setIsLiked] = React.useState(false);
   const [similar, setSimilar] = React.useState([]);
+  const [likeCount, setLikeCount] = React.useState(0);
   const [busy, setBusy] = React.useState(false);
   const inflight = React.useRef(false);
   const [note, setNote] = React.useState("");
@@ -145,6 +146,7 @@ export default function Screen() {
       .then(([m, likes, sim, id]) => {
         if (!live) return;
         setMovie(m);
+        setLikeCount(likes.items.length);
         setIsLiked(likes.items.some((x) => x.id === id));
         setSimilar(sim.items);
         setState("ready");
@@ -170,6 +172,7 @@ export default function Screen() {
     try {
       await apiFetch("/movies/" + movie.id + "/like", { method: wasLiked ? "DELETE" : "PUT" });
       setIsLiked(!wasLiked);
+      setLikeCount((n) => Math.max(0, n + (wasLiked ? -1 : 1)));
       setFailed(false);
       setNote(
         wasLiked
@@ -389,7 +392,7 @@ export default function Screen() {
             style={{ color: failed ? accent : muted, fontSize: 13 }}
           >
             <span role="status" aria-live="polite">
-              {note || (isLiked ? "You have liked this movie." : "You have not liked this movie.")}
+              {note || "You have liked " + likeCount + (likeCount === 1 ? " movie." : " movies.")}
             </span>
           </div>
         </div>

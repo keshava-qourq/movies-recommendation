@@ -80,6 +80,20 @@ describe("MovieDetail", () => {
     expect(apiFetch).toHaveBeenCalledWith("/movies/7/like", { method: "DELETE" });
   });
 
+  it("[AC-045] the status line reports the number of liked movies", async () => {
+    routes([{ id: 7 }]);
+    setup();
+    await screen.findByRole("button", { pressed: true });
+    expect(screen.getByRole("status")).toHaveTextContent("You have liked 1 movie.");
+  });
+
+  it("[AC-046] a viewer with no likes sees 0 movies", async () => {
+    routes([]);
+    setup();
+    await screen.findByRole("button", { pressed: false });
+    expect(screen.getByRole("status")).toHaveTextContent("You have liked 0 movies.");
+  });
+
   it("[AC-029] a failed like keeps the state and shows an error", async () => {
     routes([]);
     setup();
