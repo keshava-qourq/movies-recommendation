@@ -75,3 +75,35 @@ test("[AC-015][NFR-005] signup creates a viewer, never an admin", async ({ page 
   });
   expect((await me.json()).role).toBe("viewer");
 });
+
+test("[AC-014][NFR-005] a viewer who signed up on screen is refused an upload with 403 and a signed-out caller gets 401", async ({
+  page,
+  request,
+}) => {
+  await uiSignup(page, uniqueEmail(), newSecret());
+  await expect(page).toHaveURL(/\/for-you/);
+  const token = await page.evaluate(() => localStorage.getItem("session_token"));
+  expect(token).toBeTruthy();
+  const auth = { Authorization: `Bearer ${token}` };
+  const before = await (await request.get(`${API}/movies?limit=1`, { headers: auth })).json();
+
+  const file = {
+    name: "movies.csv",
+    mimeType: "text/csv",
+    buffer: Buffer.from(
+      `title,year,genres,director,cast,plot\nQA ${randomUUID().slice(0, 8)},2001,Drama,Dir,Actor,Plot\n`,
+    ),
+  };
+  const viewer = await request.post(`${API}/admin/movies/upload`, {
+    headers: auth,
+    multipart: { file },
+  });
+  expect(viewer.status()).toBe(403);
+  expect((await viewer.json()).detail).toBe("Admin access required");
+
+  const anon = await request.post(`${API}/admin/movies/upload`, { multipart: { file } });
+  expect(anon.status()).toBe(401);
+
+  const after = await (await request.get(`${API}/movies?limit=1`, { headers: auth })).json();
+  expect(after.total).toBe(before.total);
+});
